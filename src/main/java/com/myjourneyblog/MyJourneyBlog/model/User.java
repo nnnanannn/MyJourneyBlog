@@ -33,6 +33,8 @@ public class User implements UserDetails {
     @NotBlank(message = "Username is required")
     private String username;
 
+    private String email;
+
     private String password;
 
     private String bio;
@@ -47,7 +49,7 @@ public class User implements UserDetails {
 
     private boolean enabled = true;
 
-    private List<ProjectUpdate> projectUpdates;
+    //private List<ProjectUpdate> projectUpdates;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
