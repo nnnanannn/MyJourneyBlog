@@ -1,7 +1,8 @@
-# Compiled class file
+# Compiled class files
 *.class
+target/
 
-# Log file
+# Log files
 *.log
 
 # BlueJ files
@@ -22,3 +23,20 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# IDE files
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Application properties with secrets (we'll create this later)
+application-local.properties
+
+# Maven
+.mvn/
+mvn---
