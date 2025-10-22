@@ -49,7 +49,8 @@ public class User implements UserDetails {
 
     private boolean enabled = true;
 
-    //private List<ProjectUpdate> projectUpdates;
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LearningPost> learningPosts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
