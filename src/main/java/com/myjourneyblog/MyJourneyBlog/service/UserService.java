@@ -1,5 +1,7 @@
 package com.myjourneyblog.MyJourneyBlog.service;
 
+import com.myjourneyblog.MyJourneyBlog.exception.ResourceNotFoundException;
+import com.myjourneyblog.MyJourneyBlog.exception.ValidationException;
 import com.myjourneyblog.MyJourneyBlog.model.User;
 import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -28,21 +30,21 @@ public class UserService {
 
     public User findByID(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " +id));
     }
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Username not found: "+ username));
     }
 
     @Transactional
     public User createUser(User user) {
         if(userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new ValidationException("Username already exists: " + user.getUsername());
         }
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new ValidationException("Email already exists: " + user.getEmail());
         }
 
         return userRepository.save(user);
