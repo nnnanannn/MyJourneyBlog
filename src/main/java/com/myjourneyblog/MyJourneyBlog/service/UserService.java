@@ -63,4 +63,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = findByID(id);
+        userRepository.delete(user);
+    }
+
 }
