@@ -48,4 +48,19 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public User updateUser(Long id, User userDetails) {
+        User user = findByID(id);
+
+        if (userDetails.getFullname() != null) {
+            user.setFullname(userDetails.getFullname());
+        }
+        if (userDetails.getBio() != null) {
+            user.setBio(userDetails.getBio());
+        }
+
+        // updatedAt will be set automatically by @PreUpdate on LearningPost Entity
+        return userRepository.save(user);
+    }
+
 }
