@@ -39,6 +39,8 @@ public class User implements UserDetails {
 
     private String bio;
 
+    private String fullname;
+
     private String profileImageUrl;
 
     private String githubUsername;
