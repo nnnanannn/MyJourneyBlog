@@ -68,6 +68,17 @@ public class User implements UserDetails {
 
     private boolean enabled = true;
 
+    // @Prepersist makes method called automatically before entity is updated
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    protected void onUpdate(){
+        updatedAt = LocalDateTime.now();
+    }
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LearningPost> learningPosts;
 
