@@ -32,27 +32,39 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Username is required")
     @Size(min =3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Column(unique = true, nullable = false)
     private String username;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
+    @Column(unique = true, nullable = false)
     private String email;
 
     @NotBlank(message = "Password is required")
     @Size(min =6, message = "Password must be at least 6 characters" )
+    @Column(nullable = false)
     private String password;
 
+    @Column(columnDefinition = "TEXT")
     private String bio;
 
+    @Column(name = "full_name")
     private String fullname;
 
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    @Column(name = "github_username")
     private String githubUsername;
 
+    @Column(name = "linkedin_url")
     private String linkedinUrl;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     private boolean enabled = true;
 
