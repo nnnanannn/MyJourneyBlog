@@ -41,7 +41,9 @@ application-local.properties
 .mvn/
 mvn---
 
-# Sensitive configuration files
+#Sensitive config
 .env
 env.properties
 src/main/resources/env.properties
+
+target/
