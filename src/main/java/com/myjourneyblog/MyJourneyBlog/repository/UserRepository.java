@@ -40,7 +40,11 @@ public interface UserRepository extends JpaRepository<User, Long>{
     List<User> findAllByOrderByCreatedAtDesc();
     // SQL: SELECT * FROM users WHERE username LIKE '?%' ORDER BY username ASC
     // Use case: Autocomplete functionality
-    List<User> findByUsernameStartingWithOrderByUsernameAsc(String prefix);
+    // OLD WAY: Method name query
+    // List<User> findByUsernameStartingWithOrderByUsernameAsc(String prefix);
+    // NEW WAY: Using @Query annotation (choose one)
+    @Query("SELECT u FROM User u WHERE u.username LIKE CONCAT(:prefix, '%') ORDER BY u.username ASC")
+    List<User> findByUsernameStartingWithOrderByUsernameAsc(@Param("prefix") String prefix);
 
     // ========== COUNT QUERIES ==========
     // SQL: SELECT COUNT(*) FROM users WHERE created_at > ?
