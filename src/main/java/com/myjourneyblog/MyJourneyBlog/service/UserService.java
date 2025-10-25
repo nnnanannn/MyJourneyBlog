@@ -61,7 +61,7 @@ public class UserService {
             user.setBio(userDetails.getBio());
         }
 
-        // updatedAt will be set automatically by @PreUpdate on LearningPost Entity
+        // updatedAt will be set automatically by @Prepersist on User Entity
         return userRepository.save(user);
     }
 
@@ -69,6 +69,12 @@ public class UserService {
     public void deleteUser(Long id) {
         User user = findByID(id);
         userRepository.delete(user);
+    }
+
+    @Transactional
+    public User createUserThatFails(User user) {
+        userRepository.save(user);
+        throw new RuntimeException("Simulated error");
     }
 
 }
