@@ -40,3 +40,8 @@ application-local.properties
 # Maven
 .mvn/
 mvn---
+
+# Sensitive configuration files
+.env
+env.properties
+src/main/resources/env.properties
