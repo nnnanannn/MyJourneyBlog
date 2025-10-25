@@ -66,8 +66,20 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id) {
+    public void deleteUserById(Long id) {
         User user = findByID(id);
+        if (user == null) {
+            System.out.println("User not found");
+        }
+        userRepository.delete(user);
+    }
+
+    @Transactional
+    public void deleteUserByUsername(String username) {
+        User user = findByUsername(username);
+        if (user == null) {
+            System.out.println("User not found");
+        }
         userRepository.delete(user);
     }
 
