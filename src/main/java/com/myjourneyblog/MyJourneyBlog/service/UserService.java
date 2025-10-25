@@ -38,15 +38,29 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Username not found: "+ username));
     }
 
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+    }
+
     @Transactional
     public User createUser(User user) {
-        if(userRepository.existsByUsername(user.getUsername())) {
-            throw new ValidationException("Username already exists: " + user.getUsername());
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
+        boolean usernameExists = userRepository.existsByUsername(user.getUsername());
+        boolean emailExists = userRepository.existsByEmail(user.getEmail());
+
+        // Both username and email exist
+        if(usernameExists && emailExists) {
+                throw new ValidationException("Username: " + user.getUsername() + ", and Email: " + user.getEmail() +" already exist");
+            }
+        // Only username exists
+        if (usernameExists){
+                throw new ValidationException("Username already exists: " + user.getUsername());
+            }
+        // Only email exists
+        if (emailExists) {
             throw new ValidationException("Email already exists: " + user.getEmail());
         }
-
+        // Both are unique, save the user
         return userRepository.save(user);
     }
 
