@@ -1,9 +1,5 @@
 package com.myjourneyblog.MyJourneyBlog.exception;
 
-import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
-import com.myjourneyblog.MyJourneyBlog.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-
 /**
  * Exception thrown when a requested resource is not found
  */
