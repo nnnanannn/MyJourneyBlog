@@ -8,9 +8,6 @@ import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserUpdateDTO;
 
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 /**
