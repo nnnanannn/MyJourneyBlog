@@ -139,8 +139,8 @@ public class UserServiceImpl implements UserService {
 
         // Save user
         User savedUser = userRepository.save(user);
-        log.info("User registered successfully wuth ID: {}", savedUser.getId());
-        
+        log.info("User registered successfully with ID: {}", savedUser.getId());
+
         return toResponseDTO(savedUser);
     }
 
@@ -263,6 +263,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Convert User entity to UserResponseDTO
+     * No Password response back to user!
      */
     private UserResponseDTO toResponseDTO(User user) {
         return UserResponseDTO.builder()
