@@ -1,117 +1,279 @@
-package com.myjourneyblog.MyJourneyBlog.service;
+package com.myjourneyblog.MyJourneyBlog.service.impl;
 
+import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
+import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
+import com.myjourneyblog.MyJourneyBlog.dto.UserUpdateDTO;
 import com.myjourneyblog.MyJourneyBlog.exception.DuplicateResourceException;
 import com.myjourneyblog.MyJourneyBlog.exception.ResourceNotFoundException;
 import com.myjourneyblog.MyJourneyBlog.exception.ValidationException;
 import com.myjourneyblog.MyJourneyBlog.model.User;
 import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.hibernate.sql.Update;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
-import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
-import com.myjourneyblog.MyJourneyBlog.dto.UserUpdateDTO;
+import com.myjourneyblog.MyJourneyBlog.service.UserService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- *  Service interface for User business operations
+ *  Implementation of UserService
  */
 
 @Service
-//@RequiredArgsConstructor
-public class UserService {
+@RequiredArgsConstructor
+@Slf4j
+@Transactional(readOnly = true)
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    //private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-        //this.passwordEncoder = passwordEncoder;
-    }
+//    public User findByID(Long id) {
+//        return userRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " +id));
+//    }
+//
+//    public User findByUsername(String username) {
+//        return userRepository.findByUsername(username)
+//                .orElseThrow(() -> new ResourceNotFoundException("Username not found: "+ username));
+//    }
+//
+//    public User findByEmail(String email) {
+//        return userRepository.findByEmail(email)
+//                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+//    }
+//
+//    @Transactional
+//    public User createUser(User user) {
+//        boolean usernameExists = userRepository.existsByUsername(user.getUsername());
+//        boolean emailExists = userRepository.existsByEmail(user.getEmail());
+//
+//        // Both username and email exist
+//        if(usernameExists && emailExists) {
+//            throw new ValidationException("Username: " + user.getUsername() + ", and Email: " + user.getEmail() +" already exist");
+//        }
+//        // Only username exists
+//        if (usernameExists){
+//            throw new ValidationException("Username already exists: " + user.getUsername());
+//        }
+//        // Only email exists
+//        if (emailExists) {
+//            throw new ValidationException("Email already exists: " + user.getEmail());
+//        }
+//        // Both are unique, save the user
+//        return userRepository.save(user);
+//    }
+//
+//    @Transactional
+//    public User updateUser(Long id, User userDetails) {
+//        User user = findByID(id);
+//
+//        if (userDetails.getFullname() != null) {
+//            user.setFullname(userDetails.getFullname());
+//        }
+//        if (userDetails.getBio() != null) {
+//            user.setBio(userDetails.getBio());
+//        }
+//
+//        // updatedAt will be set automatically by @Prepersist on User Entity
+//        return userRepository.save(user);
+//    }
+//
+//    @Transactional
+//    public void deleteUserById(Long id) {
+//        User user = findByID(id);
+//        if (user == null) {
+//            System.out.println("User not found");
+//        }
+//        userRepository.delete(user);
+//    }
+//
+//    @Transactional
+//    public void deleteUserByUsername(String username) {
+//        User user = findByUsername(username);
+//        if (user == null) {
+//            System.out.println("User not found");
+//        }
+//        userRepository.delete(user);
+//    }
+//
+//    @Transactional
+//    public User createUserThatFails(User user) {
+//        userRepository.save(user);
+//        throw new RuntimeException("Simulated error");
+//    }
 
-    public User findByID(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " +id));
-    }
 
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Username not found: "+ username));
-    }
-
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-    }
-
+    @Override
     @Transactional
-    public User createUser(User user) {
-        boolean usernameExists = userRepository.existsByUsername(user.getUsername());
-        boolean emailExists = userRepository.existsByEmail(user.getEmail());
+    public UserResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
+        
+        // Validate username doesn't exist
+        // Fail fast! Don't attempt database operation if validation fails
+        if (userRepository.existsByUsername(registrationDTO.getUsername())) {
+            log.warn("Username already exists: {}", registrationDTO.getUsername());
+            throw new DuplicateResourceException("User", "username", registrationDTO.getUsername());
+        }
+        
+        // Validate email doesn't exist
+        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
+            log.warn("Email already exists: {}", registrationDTO.getEmail());
+            throw new DuplicateResourceException("User", "email", registrationDTO.getEmail());
+        }
+        
+        // Additional business validation
+        validatePassword(registrationDTO.getPassword());
 
-        // Both username and email exist
-        if(usernameExists && emailExists) {
-            throw new ValidationException("Username: " + user.getUsername() + ", and Email: " + user.getEmail() +" already exist");
-        }
-        // Only username exists
-        if (usernameExists){
-            throw new ValidationException("Username already exists: " + user.getUsername());
-        }
-        // Only email exists
-        if (emailExists) {
-            throw new ValidationException("Email already exists: " + user.getEmail());
-        }
-        // Both are unique, save the user
-        return userRepository.save(user);
+        // Create user entity
+        User user = User.builder()
+                .username(registrationDTO.getUsername())
+                .email(registrationDTO.getEmail())
+                .password(registrationDTO.getPassword()) // TODO: Encrypt password later
+                .fullname(registrationDTO.getFullname())
+                .bio(registrationDTO.getBio())
+                .build();
+
+        // Save user
+        User savedUser = userRepository.save(user);
+        log.info("User registered successfully wuth ID: {}", savedUser.getId());
+        
+        return toResponseDTO(savedUser);
     }
 
+    @Override
+    public UserResponseDTO getUserById(Long id) {
+        log.debug("Fetching user by ID: {}", id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", id));
+
+        return toResponseDTO(user);
+    }
+
+    @Override
+    public UserResponseDTO getUserByUsername(String username) {
+        log.debug("Fetching user by username: {}", username);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("User not found with username: %s", username)));
+
+        return toResponseDTO(user);
+
+    }
+
+    @Override
+    public List<UserResponseDTO> getAllUsers() {
+        log.debug("Fetching all users");
+
+        return userRepository.findAll()
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
-    public User updateUser(Long id, User userDetails) {
-        User user = findByID(id);
+    public UserResponseDTO updateUser(Long id, UserUpdateDTO updateDTO) {
+        log.info("Updating user with ID: {}", id);
 
-        if (userDetails.getFullname() != null) {
-            user.setFullname(userDetails.getFullname());
-        }
-        if (userDetails.getBio() != null) {
-            user.setBio(userDetails.getBio());
+        // Find existing user
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", id));
+
+        // Update email if provided and different
+        if (updateDTO.getEmail() != null && !updateDTO.getEmail().equals(user.getEmail())) {
+            // Check if new email already exists
+            if (userRepository.existsByEmail(updateDTO.getEmail())) {
+                log.warn("Email already in use: {}", updateDTO.getEmail());
+                throw new DuplicateResourceException("User", "email", updateDTO.getEmail());
+            }
+            user.setEmail(updateDTO.getEmail());
         }
 
-        // updatedAt will be set automatically by @Prepersist on User Entity
-        return userRepository.save(user);
+        // Update password if provided
+        if (updateDTO.getPassword() != null) {
+            validatePassword(updateDTO.getPassword());
+            user.setPassword(updateDTO.getPassword()); // TODO: Encrypt password later
+        }
+
+        // Update other fields
+        if (updateDTO.getFullname() != null) {
+            user.setFullname(updateDTO.getFullname());
+        }
+
+        if (updateDTO.getBio() != null) {
+            user.setBio(updateDTO.getBio());
+        }
+
+        if (updateDTO.getProfileImageUrl() != null) {
+            user.setProfileImageUrl(updateDTO.getProfileImageUrl());
+        }
+
+        // Save changes (will trigger @PreUpdate)
+        User updatedUser = userRepository.save(user);
+        log.info("User updated successfully: {}", updatedUser.getId());
+
+        return toResponseDTO(updatedUser);
     }
 
+    @Override
     @Transactional
-    public void deleteUserById(Long id) {
-        User user = findByID(id);
-        if (user == null) {
-            System.out.println("User not found");
+    public void deleteUser(Long id) {
+        log.info("Deleting user with ID: {}", id);
+
+        // Verify user exists
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("User", id);
         }
-        userRepository.delete(user);
+
+        userRepository.deleteById(id);
+        log.info("User deleted successfully: {}", id);
     }
 
-    @Transactional
-    public void deleteUserByUsername(String username) {
-        User user = findByUsername(username);
-        if (user == null) {
-            System.out.println("User not found");
+    @Override
+    public boolean usernameExists(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    /**
+     *
+     * Validate password meets business rules
+     */
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private void validatePassword(String password) {
+        if (password == null || password.length() < 6) {
+            throw new ValidationException("Password must be at least 6 characters");
         }
-        userRepository.delete(user);
+        // Assitionnal password rules to be added here later
+        // Ex.
+        // - Must contain uppercase letter
+        // - Must contain number
+        // - Must contain special character
     }
 
-    @Transactional
-    public User createUserThatFails(User user) {
-        userRepository.save(user);
-        throw new RuntimeException("Simulated error");
+    /**
+     * Convert User entity to UserResponseDTO
+     */
+    private UserResponseDTO toResponseDTO(User user) {
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullname(user.getFullname())
+                .bio(user.getBio())
+                .profileImageUrl(user.getProfileImageUrl())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
     }
-
 }

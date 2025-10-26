@@ -17,8 +17,6 @@ import java.util.List;
  *  Service interface for User business operations
  */
 
-@Service
-//@RequiredArgsConstructor
 public interface UserService {
 
     /**
