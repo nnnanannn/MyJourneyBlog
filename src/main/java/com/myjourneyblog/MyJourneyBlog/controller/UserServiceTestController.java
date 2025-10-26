@@ -3,10 +3,14 @@ package com.myjourneyblog.MyJourneyBlog.controller;
 import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserUpdateDTO;
+import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
 import com.myjourneyblog.MyJourneyBlog.service.UserService;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -70,6 +74,32 @@ public class UserServiceTestController {
     public ResponseEntity<Boolean> emailExists(@PathVariable String email) {
         boolean exists = userService.emailExists(email);
         return ResponseEntity.ok(exists);
+    }
+
+    @Autowired
+    UserRepository userRepository;
+        // ======== DELETE all users ========
+    @GetMapping("/delete-all-users")
+    public String deleteAllUsers() {
+        long count = userRepository.count();
+        userRepository.deleteAll();
+        return "Deleted " + count + " users";
+    }
+
+        //============== RESET DATABASE For Testing:  ==============
+    //==== ID Auto-Increment reset FOR TESTING ====
+    //==== DELETE ALL DATA ===
+    @Autowired
+    private EntityManager entityManager;
+    @GetMapping("/reset-ids")
+    @Transactional
+    public String resetAutoIncrement() {
+        userRepository.deleteAll();
+        userRepository.flush();
+        // Specific for PostgreSQL
+        entityManager.createNativeQuery("ALTER SEQUENCE users_id_seq RESTART WITH 1").executeUpdate();
+
+        return "Auto-increment reset for PostgreSQL";
     }
 
 }
