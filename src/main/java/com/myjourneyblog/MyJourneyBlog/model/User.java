@@ -6,21 +6,20 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter // Separate instead of @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -60,13 +59,26 @@ public class User implements UserDetails {
     @Column(name = "linkedin_url")
     private String linkedinUrl;
 
+    // ========== RELATIONSHIP TO LEARNING POSTS ==========
+
+    @OneToMany(
+            mappedBy = "author",  // Field name in LearningPost
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @Builder.Default
+    private List<LearningPost> learningPosts = new ArrayList<>();
+
+    private boolean enabled = true;
+
+    // ========== TIMESTAMPS ==========
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    private boolean enabled = true;
 
     // @Prepersist makes method called automatically before entity is updated
     @PrePersist
@@ -75,12 +87,30 @@ public class User implements UserDetails {
         updatedAt = LocalDateTime.now();
     }
 
-    protected void onUpdate(){
+    @PreUpdate
+    protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LearningPost> learningPosts;
+    // ========== CONVENIENCE METHODS ==========
+
+    /**
+     * Add learning post to user's collection
+     * Maintains bidirectional relationship
+     */
+    public void addLearningPost(LearningPost post) {
+        learningPosts.add(post);
+        post.setAuthor(this);
+    }
+
+    /**
+     * Remove learning post from user's collection
+     * Maintains bidirectional relationship
+     */
+    public void removeLearningPost(LearningPost post) {
+        learningPosts.remove(post);
+        post.setAuthor(null);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
