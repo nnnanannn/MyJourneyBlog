@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "learning_posts")
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,15 +36,8 @@ public class LearningPost {
 
     private String category; // JAVA, SPRING, DATABASE, etc.
 
-    @Column(columnDefinition = "TEXT")
-    private String summary;
-
     @Column(name = "resources_used", columnDefinition = "TEXT")
     private String resourcesUsed;
-
-    @NotBlank(message = "Topic  is required")
-    @Column(nullable = false)
-    private String topic;
 
     // ========== RELATIONSHIP TO USER ==========
 
