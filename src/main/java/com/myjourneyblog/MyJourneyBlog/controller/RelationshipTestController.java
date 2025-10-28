@@ -7,9 +7,9 @@ import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/test/relationships")
@@ -56,4 +56,71 @@ public class RelationshipTestController {
 
         return "Created 1 user with 2 posts";
     }
+
+    // ========== TEST QUERIES ==========
+
+    @GetMapping("/user-posts/{userID}")
+    @Transactional(readOnly = true)
+    public List<LearningPost> getUserPosts(@PathVariable Long userID) {
+        User user = userRepository.findById(userID).orElseThrow();
+        return user.getLearningPosts(); // Tests LAZY loading
+    }
+
+    @GetMapping("/post-author/{postId}")
+    @Transactional(readOnly = true)
+    public String getPostAuthor(@PathVariable Long postId) {
+        LearningPost post = learningPostRepository.findById(postId).orElseThrow();
+        return "Post by: " + post.getAuthor().getUsername(); // Tests LAZY loading
+    }
+
+    @GetMapping("/posts-by-author/{authorId}")
+    public List<LearningPost> getPostsByAuthor(@PathVariable Long authorId) {
+        return learningPostRepository.findByAuthorId(authorId);
+    }
+
+    @GetMapping("/all-posts-with-authors")
+    public List<LearningPost> getAllPostsWithAuthors() {
+        return learningPostRepository.findAllWithAuthors(); // Tests JOIN FETCH
+    }
+
+    @GetMapping("/search/{keyword}")
+    public List<LearningPost> searchPosts(@PathVariable String keyword) {
+        return learningPostRepository.searchByTitleOrContent(keyword);
+    }
+
+    // ========== TEST CASCADE DELETE ==========
+
+    @DeleteMapping("/delete-user-cascade/{userId}")
+    @Transactional
+    public String deleteUserCascade(@PathVariable Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        int postCount = user.getLearningPosts().size();
+        // Call setter of learningPosts field in User Entity
+
+        userRepository.delete(user);
+
+        return String.format("Deleted user and %d posts (cascade)", postCount);
+    }
+
+    // ========== TEST ORPHAN REMOVAL ==========
+
+    @DeleteMapping("/remove-post-orphan/{userId}/{postId}")
+    @Transactional
+    public String removePostOrphan(@PathVariable Long userId, @PathVariable Long postId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        LearningPost post = learningPostRepository.findById(postId).orElseThrow();
+
+        user.removeLearningPost(post); // Uses convenience method
+
+        return "Post removed from user (orphan removal should delete it)";
+    }
+
+    // ========== STATISTICS ==========
+
+    @GetMapping("/stats/user/{userId}")
+    public String getUserStats(@PathVariable Long userId) {
+        long postCount = learningPostRepository.countByAuthorId(userId);
+        return String.format("User has %d posts", postCount);
+    }
+
 }
