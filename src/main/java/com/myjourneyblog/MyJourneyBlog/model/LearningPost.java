@@ -78,8 +78,8 @@ public class LearningPost {
     }
 
     // Prevent negative view counts
-    @PrePersist
-    @PreUpdate
+    //@PrePersist
+    //@PreUpdate
     private void validateViewCount() {
         if (this.viewCount == null) {
             this.viewCount = 0;
