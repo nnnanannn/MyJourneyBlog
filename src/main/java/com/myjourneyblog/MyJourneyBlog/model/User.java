@@ -70,8 +70,6 @@ public class User implements UserDetails {
     @Builder.Default
     private List<LearningPost> learningPosts = new ArrayList<>();
 
-    private boolean enabled = true;
-
     // ========== TIMESTAMPS ==========
 
     @Column(name = "created_at", nullable = false, updatable = false)
