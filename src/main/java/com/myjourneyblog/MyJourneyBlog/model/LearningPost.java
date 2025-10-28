@@ -69,7 +69,7 @@ public class LearningPost {
         updatedAt = LocalDateTime.now();
     }
 
-    @Column(name = "view_count", nullable = false)
+    @Column(name = "view_count", nullable = true)
     private Integer viewCount = 0;
 
     // Helper method to increment view count
