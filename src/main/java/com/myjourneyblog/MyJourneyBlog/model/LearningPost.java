@@ -49,7 +49,7 @@ public class LearningPost {
 
     // ========== TIMESTAMPS ==========
 
-    @Column(name = "learning_date", nullable = false)
+    @Column(name = "learning_date")
     private LocalDate learningDate;
 
     @Column(name = "created_at", nullable = false, updatable = false)
