@@ -78,6 +78,11 @@ public class RelationshipTestController {
         return learningPostRepository.findByAuthorId(authorId);
     }
 
+    @GetMapping("/posts-by-category/{category}")
+    public List<LearningPost> getPostsByCategory(@PathVariable String category) {
+        return learningPostRepository.findByCategory(category);
+    }
+
     @GetMapping("/all-posts-with-authors")
     public List<LearningPost> getAllPostsWithAuthors() {
         return learningPostRepository.findAllWithAuthors(); // Tests JOIN FETCH
