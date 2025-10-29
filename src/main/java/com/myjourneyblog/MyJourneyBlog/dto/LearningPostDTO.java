@@ -26,7 +26,6 @@ public class LearningPostDTO {
     private String content;
 
     private String keyTakeaways;
-    private Integer timeSpentMinutes;
     private String category;
     private String resourcesUsed;
 
