@@ -134,4 +134,25 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
+    @OneToMany(
+            mappedBy = "author",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @Builder.Default
+    private List<ProjectUpdate> projectUpdates = new ArrayList<>();
+
+// Add convenience methods:
+
+    public void addProjectUpdate(ProjectUpdate update) {
+        projectUpdates.add(update);
+        update.setAuthor(this);
+    }
+
+    public void removeProjectUpdate(ProjectUpdate update) {
+        projectUpdates.remove(update);
+        update.setAuthor(null);
+    }
 }
