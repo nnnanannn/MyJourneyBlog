@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -53,17 +55,9 @@ public class ProjectUpdate {
     private Integer githubPrNumber;
 
     // Store complex GitHub PR data as JSON
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "github_pr_data", columnDefinition = "jsonb")
     private String githubPrData;
-
-    @Column(name = "lines_of_code_added")
-    private Integer linesOfCodeAdded;
-
-    @Column(name = "lines_of_code_deleted")
-    private Integer linesOfCodeDeleted;
-
-    @Column(name = "time_spent_hours")
-    private Integer timeSpentHours;
 
     @Column(columnDefinition = "TEXT")
     private String technologiesUsed;
