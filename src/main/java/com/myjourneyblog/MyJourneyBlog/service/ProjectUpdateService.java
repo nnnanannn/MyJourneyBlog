@@ -4,15 +4,17 @@ import com.myjourneyblog.MyJourneyBlog.dto.ProjectUpdateDTO;
 
 public interface ProjectUpdateService {
 
-    ProjectUpdateDTO getProjectName();
-
     ProjectUpdateDTO getUpdateDescription();
 
     ProjectUpdateDTO getUpdateType();
 
     ProjectUpdateDTO getProjectStatus();
 
-    ProjectUpdateDTO updateProject();
-
     void createUpdateProject();
+
+    void deleteUpdateProject();
+
+    ProjectUpdateDTO getLessonsLearned();
+
+    ProjectUpdateDTO getTechnologiesUsed();
 }
