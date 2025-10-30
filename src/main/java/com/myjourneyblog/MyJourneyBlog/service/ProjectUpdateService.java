@@ -1,20 +1,26 @@
 package com.myjourneyblog.MyJourneyBlog.service;
 
+import com.myjourneyblog.MyJourneyBlog.dto.LearningPostDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.ProjectUpdateDTO;
+import com.myjourneyblog.MyJourneyBlog.model.ProjectStatus;
+import com.myjourneyblog.MyJourneyBlog.model.UpdateType;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface ProjectUpdateService {
 
-    ProjectUpdateDTO getUpdateDescription();
+    ProjectUpdateDTO createProjectUpdate(Long authorId, ProjectUpdateDTO projectUpdateDTO);
 
-    ProjectUpdateDTO getUpdateType();
+    ProjectUpdateDTO getProjectUpdateByProjectName(String projectName);
 
-    ProjectUpdateDTO getProjectStatus();
+    ProjectUpdateDTO getProjectUpdateById(Long id);
 
-    void createUpdateProject();
+    List<ProjectUpdateDTO> getAllProjectUpdates();
 
-    void deleteUpdateProject();
+    List<ProjectUpdateDTO> getProjectUpdateByType(UpdateType updateType);
 
-    ProjectUpdateDTO getLessonsLearned();
+    List<ProjectUpdateDTO> getProjectUpdateByStatus(ProjectStatus projectStatus);
 
-    ProjectUpdateDTO getTechnologiesUsed();
+    void deleteUpdateProject(Long id);
 }
