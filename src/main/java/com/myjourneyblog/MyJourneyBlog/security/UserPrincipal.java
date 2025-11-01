@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private final Long id; // Out user ID
+    private final Long id; // Our user ID
     private final String username;
     private final String email; // Extra field
     private final String password;
