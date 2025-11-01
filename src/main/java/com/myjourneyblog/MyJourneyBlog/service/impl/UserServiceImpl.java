@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
 //    public User findByID(Long id) {
 //        return userRepository.findById(id)
@@ -111,6 +113,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
+        log.info("Registering new user with username: {}", registrationDTO.getUsername());
         
         // Validate username doesn't exist
         // Fail fast! Don't attempt database operation if validation fails
@@ -128,11 +131,11 @@ public class UserServiceImpl implements UserService {
         // Additional business validation
         validatePassword(registrationDTO.getPassword());
 
-        // Create user entity
+        // Create user entity with ENCRYPTED password
         User user = User.builder()
                 .username(registrationDTO.getUsername())
                 .email(registrationDTO.getEmail())
-                .password(registrationDTO.getPassword()) // TODO: Encrypt password later
+                .password(passwordEncoder.encode(registrationDTO.getPassword())) // ENCRYPT!
                 .fullname(registrationDTO.getFullname())
                 .bio(registrationDTO.getBio())
                 .build();
@@ -182,7 +185,8 @@ public class UserServiceImpl implements UserService {
         log.info("Updating user with ID: {}", id);
 
         // Find existing user
-        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", id));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", id));
 
         // Update email if provided and different
         if (updateDTO.getEmail() != null && !updateDTO.getEmail().equals(user.getEmail())) {
@@ -194,10 +198,10 @@ public class UserServiceImpl implements UserService {
             user.setEmail(updateDTO.getEmail());
         }
 
-        // Update password if provided
+        // Update password if provided (and encrypt it!)
         if (updateDTO.getPassword() != null) {
             validatePassword(updateDTO.getPassword());
-            user.setPassword(updateDTO.getPassword()); // TODO: Encrypt password later
+            user.setPassword(passwordEncoder.encode(updateDTO.getPassword())); // ENCRYPT!
         }
 
         // Update other fields
@@ -254,7 +258,7 @@ public class UserServiceImpl implements UserService {
         if (password == null || password.length() < 6) {
             throw new ValidationException("Password must be at least 6 characters");
         }
-        // Assitionnal password rules to be added here later
+        // Additional password rules to be added here later
         // Ex.
         // - Must contain uppercase letter
         // - Must contain number
