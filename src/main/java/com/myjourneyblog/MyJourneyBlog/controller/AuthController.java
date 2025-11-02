@@ -4,6 +4,7 @@ import com.myjourneyblog.MyJourneyBlog.dto.AuthResponse;
 import com.myjourneyblog.MyJourneyBlog.dto.LoginRequest;
 import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
+import com.myjourneyblog.MyJourneyBlog.security.JwtTokenProvider;
 import com.myjourneyblog.MyJourneyBlog.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,16 +29,35 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider tokenProvider;
 
     /**
      * Register new user
      */
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
-        log.info("Registration request for username; {}", registrationDTO.getUsername());
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
+        log.info("Registration request for username: {}", registrationDTO.getUsername());
 
+        // Register user
         UserResponseDTO user = userService.registerUser(registrationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+
+        // Generate JWT token
+        String token = tokenProvider.generateTokenFromUsername(
+                user.getUsername(),
+                user.getId(),
+                user.getEmail()
+        );
+
+        // Create response with token
+        AuthResponse response = AuthResponse.builder()
+                .token(token)
+                .tokenType("Bearer")
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .message("Registration successful")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     }
 
@@ -57,17 +77,19 @@ public class AuthController {
                     )
             );
 
-            // Set authentication in context
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Generate JWT token
+            String token = tokenProvider.generateToken(authentication);
 
             // Get user details
             UserResponseDTO user = userService.getUserByUsername(loginRequest.getUsername());
 
-            // Create response
+            // Create response with token
             AuthResponse response = AuthResponse.builder()
-                    .message("Login successful")
+                    .token(token)
+                    .tokenType("Bearer")
                     .username(user.getUsername())
                     .email(user.getEmail())
+                    .message("Login successful")
                     .build();
 
             log.info("Login successful for user: {}", loginRequest.getUsername());

@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class AuthResponse {
-    private String message;
+    private String token;      // JWT token
+    private String tokenType = "Bearer";
     private String username;
     private String email;
+    private String message;
 }
