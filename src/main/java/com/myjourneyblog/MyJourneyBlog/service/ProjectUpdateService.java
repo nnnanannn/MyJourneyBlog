@@ -4,13 +4,14 @@ import com.myjourneyblog.MyJourneyBlog.dto.LearningPostDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.ProjectUpdateDTO;
 import com.myjourneyblog.MyJourneyBlog.model.ProjectStatus;
 import com.myjourneyblog.MyJourneyBlog.model.UpdateType;
+import jakarta.validation.Valid;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface ProjectUpdateService {
 
-    ProjectUpdateDTO createProjectUpdate(Long authorId, ProjectUpdateDTO projectUpdateDTO);
+    ProjectUpdateDTO createUpdate(Long id, @Valid ProjectUpdateDTO updateDTO);
 
     ProjectUpdateDTO getProjectUpdateByProjectName(String projectName);
 
