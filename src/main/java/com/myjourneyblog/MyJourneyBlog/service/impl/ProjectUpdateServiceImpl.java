@@ -28,25 +28,25 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
 
     @Override
     @Transactional
-    public ProjectUpdateDTO createProjectUpdate(Long authorId, ProjectUpdateDTO projectUpdateDTO) {
+    public ProjectUpdateDTO createUpdate(Long authorId, ProjectUpdateDTO updateDTO) {
         log.info("Creating project update for author ID: {}", authorId);
 
         User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", authorId));
 
         ProjectUpdate projectUpdate = ProjectUpdate.builder()
-                .title(projectUpdateDTO.getTitle())
-                .description(projectUpdateDTO.getDescription())
-                .updateType(projectUpdateDTO.getUpdateType())
-                .projectStatus(projectUpdateDTO.getProjectStatus())
-                .githubRepoUrl(projectUpdateDTO.getGithubRepoUrl())
-                .githubCommitHash(projectUpdateDTO.getGithubCommitHash())
-                .githubPrNumber(projectUpdateDTO.getGithubPrNumber())
-                .githubPrData(projectUpdateDTO.getGithubPrData())
-                .technologiesUsed(projectUpdateDTO.getTechnologiesUsed())
-                .challengesFaced(projectUpdateDTO.getChallengesFaced())
-                .lessonsLearned(projectUpdateDTO.getLessonsLearned())
-                .nextSteps(projectUpdateDTO.getNextSteps())
+                .title(updateDTO.getTitle())
+                .description(updateDTO.getDescription())
+                .updateType(updateDTO.getUpdateType())
+                .projectStatus(updateDTO.getProjectStatus())
+                .githubRepoUrl(updateDTO.getGithubRepoUrl())
+                .githubCommitHash(updateDTO.getGithubCommitHash())
+                .githubPrNumber(updateDTO.getGithubPrNumber())
+                .githubPrData(updateDTO.getGithubPrData())
+                .technologiesUsed(updateDTO.getTechnologiesUsed())
+                .challengesFaced(updateDTO.getChallengesFaced())
+                .lessonsLearned(updateDTO.getLessonsLearned())
+                .nextSteps(updateDTO.getNextSteps())
                 .build();
 
         ProjectUpdate savedProjectUpdate = projectUpdateRepository.save(projectUpdate);
