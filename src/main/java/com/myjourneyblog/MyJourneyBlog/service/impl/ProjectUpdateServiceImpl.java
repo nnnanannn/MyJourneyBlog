@@ -55,22 +55,26 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
         return toDTO(projectUpdate);
     }
 
-
-
     @Override
-    public ProjectUpdateDTO getProjectUpdateByProjectName(String projectName) {
+    public List<ProjectUpdateDTO> getUpdatesByProject(String projectName) {
         log.debug("Fetching project update by project name: {}", projectName);
         return null;
     }
 
     @Override
-    public ProjectUpdateDTO getProjectUpdateById(Long id) {
+    public ProjectUpdateDTO getUpdateById(Long id) {
         log.debug("Fetching project update by ID: {}", id);
         return null;
     }
 
     @Override
-    public List<ProjectUpdateDTO> getAllProjectUpdates() {
+    public List<ProjectUpdateDTO> getUpdatesByAuthor(Long authorId) {
+        log.debug("Fetching project update by author: {}", authorId);
+        return null;
+    }
+
+    @Override
+    public List<ProjectUpdateDTO> getAllUpdates() {
         log.debug("Fetching all learning posts");
 
         return projectUpdateRepository.findAllWithAuthors()
@@ -80,7 +84,7 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
     }
 
     @Override
-    public List<ProjectUpdateDTO> getProjectUpdateByType(UpdateType updateType) {
+    public List<ProjectUpdateDTO> getUpdatesByType(UpdateType updateType) {
         log.debug("Fetching posts by update type: {}", updateType);
 
         return projectUpdateRepository.findByUpdateType(updateType)
@@ -90,7 +94,7 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
     }
 
     @Override
-    public List<ProjectUpdateDTO> getProjectUpdateByStatus(ProjectStatus projectStatus) {
+    public List<ProjectUpdateDTO> getUpdatesByStatus(ProjectStatus projectStatus) {
         log.debug("Fetching posts by project status: {}", projectStatus);
 
         return projectUpdateRepository.findByProjectStatus(projectStatus)
@@ -101,7 +105,7 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
 
     @Transactional
     @Override
-    public void deleteUpdateProject(Long id) {
+    public void deleteUpdate(Long id) {
         log.info("Deleting project update ID: {}", id);
 
         if (!projectUpdateRepository.existsById(id)) {
@@ -111,6 +115,16 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
         projectUpdateRepository.deleteById(id);
         log.info("Project update deleted: {}", id);
 
+    }
+
+    @Override
+    public List<ProjectUpdateDTO> searchUpdates(String keyword) {
+        return List.of();
+    }
+
+    @Override
+    public ProjectUpdateDTO updateUpdate(Long id, ProjectUpdateDTO updateDTO) {
+        return null;
     }
 
     private ProjectUpdateDTO toDTO(ProjectUpdate projectUpdate) {
