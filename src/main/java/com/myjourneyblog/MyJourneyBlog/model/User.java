@@ -59,6 +59,11 @@ public class User implements UserDetails {
     @Column(name = "linkedin_url")
     private String linkedinUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private Role role = Role.ROLE_USER;
+
     // ========== RELATIONSHIP TO LEARNING POSTS ==========
 
     @OneToMany(
