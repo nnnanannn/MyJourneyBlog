@@ -13,15 +13,21 @@ public interface ProjectUpdateService {
 
     ProjectUpdateDTO createUpdate(Long id, @Valid ProjectUpdateDTO updateDTO);
 
-    ProjectUpdateDTO getProjectUpdateByProjectName(String projectName);
+    List<ProjectUpdateDTO> getUpdatesByProject(String projectName);
+    
+    ProjectUpdateDTO getUpdateById(Long id);
 
-    ProjectUpdateDTO getProjectUpdateById(Long id);
+    List<ProjectUpdateDTO> getUpdatesByAuthor(Long authorId);
 
-    List<ProjectUpdateDTO> getAllProjectUpdates();
+    List<ProjectUpdateDTO> getAllUpdates();
 
-    List<ProjectUpdateDTO> getProjectUpdateByType(UpdateType updateType);
+    List<ProjectUpdateDTO> getUpdatesByType(UpdateType type);
 
-    List<ProjectUpdateDTO> getProjectUpdateByStatus(ProjectStatus projectStatus);
+    List<ProjectUpdateDTO> getUpdatesByStatus(ProjectStatus status);
 
-    void deleteUpdateProject(Long id);
+    void deleteUpdate(Long id);
+
+    List<ProjectUpdateDTO> searchUpdates(String keyword);
+
+    ProjectUpdateDTO updateUpdate(Long id, @Valid ProjectUpdateDTO updateDTO);
 }
