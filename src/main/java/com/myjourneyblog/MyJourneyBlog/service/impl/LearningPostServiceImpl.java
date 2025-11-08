@@ -9,6 +9,8 @@ import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
 import com.myjourneyblog.MyJourneyBlog.service.LearningPostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,6 +136,35 @@ public class LearningPostServiceImpl implements LearningPostService {
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Implement Pageable Methods
+    @Override
+    public Page<LearningPostDTO> getAllPosts(Pageable pageable) {
+        log.debug("Fetching learning posts with pagination: page={}, size={}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<LearningPost> postPage = learningPostRepository.findAllWithAuthors(pageable);
+
+        return postPage.map(this::toDTO);
+    }
+
+    @Override
+    public Page<LearningPostDTO> getPostsByAuthor(Long authorId, Pageable pageable) {
+        Page<LearningPost> postPage = learningPostRepository.findByAuthorIdWithAuthor(authorId, pageable);
+        return postPage.map(this::toDTO);
+    }
+
+    @Override
+    public Page<LearningPostDTO> getPostsByCategory(String category, Pageable pageable) {
+        Page<LearningPost> postPage = learningPostRepository.findByCategoryWithAuthor(category, pageable);
+        return postPage.map(this::toDTO);
+    }
+
+    @Override
+    public Page<LearningPostDTO> searchPosts(String keyword, Pageable pageable) {
+        Page<LearningPost> postPage = learningPostRepository.searchByTitleOrContent(keyword, pageable);
+        return postPage.map(this::toDTO);
     }
 
     private LearningPostDTO toDTO(LearningPost post) {
