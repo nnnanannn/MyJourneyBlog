@@ -3,6 +3,8 @@ package com.myjourneyblog.MyJourneyBlog.repository;
 import com.myjourneyblog.MyJourneyBlog.model.ProjectStatus;
 import com.myjourneyblog.MyJourneyBlog.model.ProjectUpdate;
 import com.myjourneyblog.MyJourneyBlog.model.UpdateType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -62,6 +64,18 @@ public interface ProjectUpdateRepository extends JpaRepository<ProjectUpdate, Lo
 
     long countByAuthorIdAndProjectStatus(Long authorId, ProjectStatus status);
 
+    // ========== PAGE QUERIES ==========
+
+    Page<ProjectUpdate> findAll(Pageable pageable);
+
+    Page<ProjectUpdate> findByAuthorId(Long authorId, Pageable pageable);
+
+    Page<ProjectUpdate> findByProjectStatus(ProjectStatus status, Pageable pageable);
+
+    Page<ProjectUpdate> findByUpdateType(UpdateType type, Pageable pageable);
+
+    Page<ProjectUpdate> findByProjectName(String projectName, Pageable pageable);
+
     // ========== CUSTOM @Query METHODS ==========
 
     // Find all with authors (prevent N+1)
@@ -100,4 +114,14 @@ public interface ProjectUpdateRepository extends JpaRepository<ProjectUpdate, Lo
     // Native query for JSON operations (PostgreSQL specific)
     @Query(value = "SELECT * FROM project_updates WHERE github_pr_data IS NOT NULL", nativeQuery = true)
     List<ProjectUpdate> findAllWithGitHubData();
+
+    // Page Query
+    @Query("SELECT p FROM ProjectUpdate p JOIN FETCH p.author")
+    Page<ProjectUpdate> findAllWithAuthors(Pageable pageable);
+
+    @Query("SELECT p FROM ProjectUpdate p WHERE " +
+            "LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<ProjectUpdate> searchByTitleOrDescription(@Param("keyword") String keyword, Pageable pageable);
+
 }
