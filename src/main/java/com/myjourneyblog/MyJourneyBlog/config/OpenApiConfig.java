@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
                 ),
                 @Server(
                         description = "Production",
-                        url = "https://api.devjourney.com"
+                        url = "https://api.myjourneyblog.com"
                 )
         }
 )
