@@ -1,11 +1,14 @@
 package com.myjourneyblog.MyJourneyBlog.controller;
 
-import com.myjourneyblog.MyJourneyBlog.dto.AuthResponse;
-import com.myjourneyblog.MyJourneyBlog.dto.LoginRequest;
-import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
-import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
+import com.myjourneyblog.MyJourneyBlog.dto.*;
 import com.myjourneyblog.MyJourneyBlog.security.JwtTokenProvider;
 import com.myjourneyblog.MyJourneyBlog.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Authentication", description = "User registration and login endpoints")
 public class AuthController {
 
     private final UserService userService;
@@ -35,6 +39,27 @@ public class AuthController {
      * Register new user
      */
     @PostMapping("/register")
+    @Operation(
+            summary = "Register new user",
+            description = "Create a new user account and receive JWT token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "User registered successfully",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Username or email already exists",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
         log.info("Registration request for username: {}", registrationDTO.getUsername());
 
@@ -65,6 +90,22 @@ public class AuthController {
      * Login (authenticate user)
      */
     @PostMapping("/login")
+    @Operation(
+            summary = "User login",
+            description = "Authenticate user and receive JWT token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Login successful",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid credentials",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         log.info("Login attempt for username: {}", loginRequest.getUsername());
 

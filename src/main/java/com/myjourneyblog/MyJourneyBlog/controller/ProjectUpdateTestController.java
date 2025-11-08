@@ -28,10 +28,10 @@ public class ProjectUpdateTestController {
         User user = userRepository.findByUsername("learner")
                 .orElseGet(() -> {
                     User newUser = User.builder()
-                            .username("learner")
-                            .email("learner@example.com")
+                            .username("learner1")
+                            .email("learner1@example.com")
                             .password("password123")
-                            .fullname("Active Learner")
+                            .fullname("Active1 Learner")
                             .build();
                     return userRepository.save(newUser);
                 });
