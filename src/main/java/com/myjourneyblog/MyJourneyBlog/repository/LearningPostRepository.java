@@ -34,9 +34,10 @@ public interface LearningPostRepository extends JpaRepository<LearningPost, Long
     // Find posts by author username
     List<LearningPost> findByAuthorUsername(String username);
 
+    // Pageable versions of existing methods
     Page<LearningPost> findAll(Pageable pageable);
 
-    Page<LearningPost> findByAuthorID(Long authorId, Pageable pageable);
+    Page<LearningPost> findByAuthorId(Long authorId, Pageable pageable);
 
     Page<LearningPost> findByAuthorUsername(String username, Pageable pageable);
 
@@ -60,12 +61,19 @@ public interface LearningPostRepository extends JpaRepository<LearningPost, Long
             "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<LearningPost> searchByTitleOrContent(@Param("keyword") String keyword);
 
+    // Custom queries with Pageable
     @Query("SELECT p FROM LearningPost p JOIN FETCH p.author")
     Page<LearningPost> findAllWithAuthors(Pageable pageable);
 
     @Query("SELECT p FROM LearningPost p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<LearningPost> searchByTitleOrContent(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT p FROM LearningPost p JOIN FETCH p.author WHERE p.author.id = :authorId")
+    Page<LearningPost> findByAuthorIdWithAuthor(@Param("authorId") Long authorId, Pageable pageable);
+
+    @Query("SELECT p FROM LearningPost p JOIN FETCH p.author WHERE p.category = :category")
+    Page<LearningPost> findByCategoryWithAuthor(@Param("category") String category, Pageable pageable);
 
     // Count posts by author
     long countByAuthorId(Long authorId);
