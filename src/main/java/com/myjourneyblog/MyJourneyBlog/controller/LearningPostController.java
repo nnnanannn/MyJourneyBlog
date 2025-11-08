@@ -1,11 +1,16 @@
 package com.myjourneyblog.MyJourneyBlog.controller;
 
 import com.myjourneyblog.MyJourneyBlog.dto.LearningPostDTO;
+import com.myjourneyblog.MyJourneyBlog.dto.PageResponse;
 import com.myjourneyblog.MyJourneyBlog.model.LearningPost;
 import com.myjourneyblog.MyJourneyBlog.security.UserPrincipal;
 import com.myjourneyblog.MyJourneyBlog.service.LearningPostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,13 +48,26 @@ public class LearningPostController {
     }
 
     /**
-     * Get all learning posts
-     * Public endpoint
+     * Get all learning posts with pagination and sorting
+     *
+     * @param page Page number (0-indexed, default: 0)
+     * @param size Page size (default: 20)
+     * @param sortBy Sort field (default: createdAt)
+     * @param direction Sort direction (ASC/DESC, default: DESC)
      */
     @GetMapping
-    public ResponseEntity<List<LearningPostDTO>> getAllPosts() {
-        List<LearningPostDTO> posts = learningPostService.getAllPosts();
-        return ResponseEntity.ok(posts);
+    public ResponseEntity<PageResponse<LearningPostDTO>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String direction) {
+
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
+        Page<LearningPostDTO> postPage = learningPostService.getAllPosts(pageable);
+
+        return ResponseEntity.ok(PageResponse.of(postPage));
     }
 
     /**
@@ -63,31 +81,43 @@ public class LearningPostController {
     }
 
     /**
-     * Get posts by category
+     * Get posts by category with pagination
      * Public endpoint
      */
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<LearningPostDTO>> getPostsByCategory(
-            @PathVariable String category) {
+    public ResponseEntity<PageResponse<LearningPostDTO>> getPostsByCategory(
+            @PathVariable String category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String direction) {
 
-        List<LearningPostDTO> posts = learningPostService.getPostsByCategory(category);
-        return ResponseEntity.ok(posts);
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by(Sort.Direction.fromString(direction), sortBy));
+
+        Page<LearningPostDTO> postPage = learningPostService.getPostsByCategory(category, pageable);
+
+        return ResponseEntity.ok(PageResponse.of(postPage));
     }
 
     /**
-     * Get current user's posts
+     * Get current user's posts with pagination
      * Authenticated users only
      */
     @GetMapping("/my-posts")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<LearningPostDTO>> getMyPosts(
-            @AuthenticationPrincipal UserPrincipal currentUser) {
+    public ResponseEntity<PageResponse<LearningPostDTO>> getMyPosts(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
 
-        List<LearningPostDTO> posts = learningPostService.getPostsByAuthor(
-                currentUser.getId()
-        );
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        return ResponseEntity.ok(posts);
+        Page<LearningPostDTO> postPage = learningPostService.getPostsByAuthor(
+                currentUser.getId(), pageable);
+
+        return ResponseEntity.ok(PageResponse.of(postPage));
     }
 
     /**
@@ -103,15 +133,21 @@ public class LearningPostController {
     }
 
     /**
-     * Search posts by keyword
+     * Search posts by keyword with pagination
      * Public endpoint
      */
     @GetMapping("/search")
-    public ResponseEntity<List<LearningPostDTO>> searchPosts(
-            @RequestParam String keyword) {
+    public ResponseEntity<PageResponse<LearningPostDTO>> searchPosts(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
 
-        List<LearningPostDTO> posts = learningPostService.searchPosts(keyword);
-        return ResponseEntity.ok(posts);
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<LearningPostDTO> postPage = learningPostService.searchPosts(keyword, pageable);
+
+        return ResponseEntity.ok(PageResponse.of(postPage));
     }
 
     /**
@@ -125,7 +161,6 @@ public class LearningPostController {
             @Valid @RequestBody LearningPostDTO postDTO,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        // TODO: Add ownership check in service
         LearningPostDTO updatedPost = learningPostService.updatePost(id, postDTO);
         return ResponseEntity.ok(updatedPost);
     }
@@ -140,7 +175,6 @@ public class LearningPostController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        // TODO: Add ownership check in service
         learningPostService.deletePost(id);
         return ResponseEntity.noContent().build();
     }
