@@ -78,4 +78,11 @@ public interface UserService {
      */
     boolean emailExists(String email);
 
+    /**
+     * Method to update profile image
+     * @param id user ID
+     * @param imageUrl url of profile image
+     * @return
+     */
+    UserResponseDTO updateProfileImage(Long id, String imageUrl);
 }

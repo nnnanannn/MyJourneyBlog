@@ -5,6 +5,7 @@ import com.myjourneyblog.MyJourneyBlog.dto.LearningPostDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserUpdateDTO;
 import com.myjourneyblog.MyJourneyBlog.security.UserPrincipal;
+import com.myjourneyblog.MyJourneyBlog.service.FileStorageService;
 import com.myjourneyblog.MyJourneyBlog.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,6 +36,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final FileStorageService fileStorageService;
 
     /**
      * Get current authenticated user info
@@ -257,5 +260,25 @@ public class UserController {
             @PathVariable String email) {
         boolean exists = userService.emailExists(email);
         return ResponseEntity.ok(exists);
+    }
+
+    /**
+     * Update profile image
+     */
+    @PostMapping("/me/profile-image")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Update profile image")
+    public ResponseEntity<UserResponseDTO> updateProfileImage(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestParam("file") MultipartFile file) {
+
+        // Upload file
+        String fileName = fileStorageService.storeProfileImage(file, currentUser.getUsername());
+        String fileUrl = fileStorageService.getFileUrl(fileName, true);
+
+        // Update user
+        UserResponseDTO user = userService.updateProfileImage(currentUser.getId(), fileUrl);
+
+        return ResponseEntity.ok(user);
     }
 }

@@ -9,6 +9,7 @@ import com.myjourneyblog.MyJourneyBlog.exception.ValidationException;
 import com.myjourneyblog.MyJourneyBlog.model.User;
 import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
 
+import com.myjourneyblog.MyJourneyBlog.service.FileStorageService;
 import com.myjourneyblog.MyJourneyBlog.service.UserService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -33,6 +34,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
 
 //    public User findByID(Long id) {
 //        return userRepository.findById(id)
@@ -263,6 +265,26 @@ public class UserServiceImpl implements UserService {
         // - Must contain uppercase letter
         // - Must contain number
         // - Must contain special character
+    }
+
+    // Method to update profile image:
+    @Transactional
+    public UserResponseDTO updateProfileImage(Long id, String imageUrl) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Delete old image if exists
+        if (user.getProfileImageUrl() != null) {
+            String oldFileName = user.getProfileImageUrl().substring(
+                    user.getProfileImageUrl().lastIndexOf("/") + 1
+            );
+            fileStorageService.deleteFile(oldFileName, true);
+        }
+
+        user.setProfileImageUrl(imageUrl);
+        User savedUser = userRepository.save(user);
+
+        return toResponseDTO(savedUser);
     }
 
     /**
