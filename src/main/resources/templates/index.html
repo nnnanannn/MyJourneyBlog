@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <!-- Main styles -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Home - My Learning Journey</title>
+</head>
+<body>
+    <main layout:fragment="content">
+        <div class = "page-header">
+            <h1>Welcome to My Journey</h1>
+            <p>Documenting my learning path</p>
+        </div>
+
+        <div class = "intro-section" style = "margin-bottom: 3rem;">
+            <div class = "card">
+                <h2 style = "margin-bottom: 1rem;">About This Blog</h2>
+                <p style = "margin-bottom: 1rem;">
+                    This is my learning journal where I document my daily progress.
+                    I track my learning topics, project updates, and technical insights.
+                </p>
+                <p>
+                    Navigate through my learning journey by date or topic, and explore my project updates to see what I'm building!
+                </p>
+            </div>
+        </div>
+
+        <section style="margin-bottom: 3rem;">
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.75rem;">Recent Learning Posts</h2>
+            <div th:if="${recentPosts != null and !recentPosts.isEmpty()}">
+                <div th:each="post : ${#lists.size(recentPosts) > 5 ? recentPosts.subList(0, 5) : recentPosts}"
+                     class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                        <a th:href="@{/learning/post/{id}(id=${post.id})}"
+                           style="text-decoration: none; color: var(--beige-900);">
+                            <h3 class="card-title" th:text="${post.title}">Post Title</h3>
+                        </a>
+                        <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
+                              th:text="${post.category}">Category</span>
+                    </div>
+                    <a th:href="@{/learning/post/{id}(id=${post.id})}"
+                       style="color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 1rem; display: inline-block;">
+                        Read more →
+                    </a>
+                </div>
+            </div>
+            <div th:if="${recentPosts == null or recentPosts.isEmpty()}" class="card">
+                <p style="color: var(--beige-600);">No learning posts yet. Start documenting your journey!</p>
+            </div>
+            <a href="/learning/by-date" class="btn" style="margin-top: 1rem;">View All Learning Posts</a>
+        </section>
+
+        <section>
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.75rem;">Recent Project Updates</h2>
+            <div th:if="${recentUpdates != null and !recentUpdates.isEmpty()}">
+                <div th:each="update : ${#lists.size(recentUpdates) > 5 ? recentUpdates.subList(0, 5) : recentUpdates}"
+                     class="card">
+
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                        <a th:href="@{/projects/update/{id}(id=${update.id})}"
+                           style="text-decoration: none; color: var(--beige-900);">
+                            <h3 class="card-title" th:text="${update.projectName}">Project</h3>
+
+                            <div class="card-meta">
+                        <span style="background-color: var(--accent); color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
+                              th:text="${update.projectStatus}">Project Status</span>
+                            </div>
+                        </a>
+
+                        <span style="background-color: var(--accent); color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
+                              th:text="${update.updateType}">Update type</span>
+                    </div>
+
+
+                    <div class="card-meta">
+                        <span th:text="${#temporals.format(update.updatedAt, 'MMMM dd, yyyy')}">Date</span>
+                        <span style="margin: 0 0.5rem;">•</span>
+                    </div>
+
+                    <a th:href="@{/projects/update/{id}(id=${update.id})}"
+                       style="color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 1rem; display: inline-block;">
+                        Read more →
+                    </a>
+                </div>
+            </div>
+            <div th:if="${recentUpdates == null or recentUpdates.isEmpty()}" class="card">
+                <p style="color: var(--beige-600);">No project updates yet. Start building and documenting!</p>
+            </div>
+            <a href="/projects/by-date" class="btn" style="margin-top: 1rem;">View All Project Updates</a>
+        </section>
+
+
+
+
+    </main>
+</body>
+</html>

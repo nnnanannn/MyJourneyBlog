@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'My Learning Journey'">My Learning Journey</title>
+    <style>
+        :root {
+            --beige-50: #faf8f5;
+            --beige-100: #f5f1e8;
+            --beige-200: #e8ddc8;
+            --beige-300: #d4c5a3;
+            --beige-400: #c0ad85;
+            --beige-500: #a89268;
+            --beige-600: #8b7756;
+            --beige-700: #6d5d45;
+            --beige-800: #4f4332;
+            --beige-900: #362d22;
+            --accent: #c07855;
+            --accent-hover: #a86749;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--beige-50);
+            color: var(--beige-900);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--beige-100);
+            border-right: 1px solid var(--beige-300);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 2rem 0;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid var(--beige-300);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            color: var(--beige-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.875rem;
+            color: var(--beige-600);
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--beige-600);
+            padding: 0 1.5rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: var(--beige-700);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            background-color: var(--beige-200);
+            color: var(--beige-900);
+            border-left-color: var(--accent);
+        }
+
+        .nav-link.active {
+            background-color: var(--beige-200);
+            color: var(--beige-900);
+            border-left-color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem 3rem;
+            max-width: 1200px;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--beige-300);
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: var(--beige-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--beige-600);
+            font-size: 1.125rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--beige-300);
+            color: var(--beige-900);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--beige-400);
+        }
+
+        /* Cards */
+        .card {
+            background-color: white;
+            border: 1px solid var(--beige-300);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: var(--beige-900);
+            margin-bottom: 0.75rem;
+        }
+
+        .card-meta {
+            font-size: 0.875rem;
+            color: var(--beige-600);
+            margin-bottom: 1rem;
+        }
+
+        .card-content {
+            color: var(--beige-700);
+            line-height: 1.7;
+        }
+
+        /* Auth buttons in sidebar */
+        .auth-section {
+            padding: 1.5rem;
+            border-top: 1px solid var(--beige-300);
+            margin-top: auto;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: column;
+        }
+
+        .user-info {
+            padding: 1rem;
+            background-color: var(--beige-200);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .user-info p {
+            font-size: 0.875rem;
+            color: var(--beige-700);
+        }
+    </style>
+
+    <th:block layout:fragment="extra-css"></th:block>
+</head>
+<body>
+<div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>My Journey</h1>
+            <p>Learning Log & Projects</p>
+        </div>
+
+        <nav>
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/" class="nav-link" th:classappend="${#request.requestURI == '/' ? 'active' : ''}">Home</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Learning Journey</div>
+                <a href="/learning/by-date" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/learning/by-date') ? 'active' : ''}">By Date</a>
+                <a href="/learning/by-topic" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/learning/by-topic') ? 'active' : ''}">By Topic</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Projects</div>
+                <a href="/projects/by-date" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/projects/by-date') ? 'active' : ''}">By Date</a>
+                <a href="/projects/by-project" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/projects/by-project') ? 'active' : ''}">By Project</a>
+            </div>
+        </nav>
+
+        <div class="auth-section">
+            <div class="auth-buttons">
+                <a href="/dashboard" class="btn">Dashboard</a>
+                <a href="/login" class="btn-secondary btn">Login</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <th:block layout:fragment="content"></th:block>
+    </main>
+</div>
+
+<th:block layout:fragment="extra-js"></th:block>
+</body>
+</html>

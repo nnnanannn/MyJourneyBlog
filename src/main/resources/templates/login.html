@@ -1,0 +1,239 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Login - Developer Learning Journey</title>
+</head>
+<head>
+    <!-- Main styles -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Home - My Learning Journey</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Login</h1>
+        <p>Access your dashboard to create and manage posts</p>
+    </div>
+
+    <div class="card" style="max-width: 500px; margin: 2rem auto;">
+        <form id="loginForm">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Username</label>
+                <input type="text" id="username" name="username" required
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Password</label>
+                <input type="password" id="password" name="password" required
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div id="errorMessage" style="display: none; padding: 0.75rem; background-color: #fee; border: 1px solid #fcc; border-radius: 6px; margin-bottom: 1rem; color: #c00;"></div>
+
+            <button type="submit" class="btn" style="width: 100%;">Login</button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; color: var(--beige-600);">
+            Don't have an account? <a href="/register" style="color: var(--accent);">Register here</a>
+        </p>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.username);
+                    window.location.href = '/dashboard';
+                } else {
+                    const error = await response.text();
+                    errorDiv.textContent = error || 'Login failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>
+
+<!-- ===================================== -->
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Dashboard - Developer Learning Journey</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Manage your learning posts and project updates</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+        <div class="card">
+            <h3 style="margin-bottom: 0.5rem;">Create Learning Post</h3>
+            <p style="color: var(--beige-600); margin-bottom: 1rem;">Document your daily learning</p>
+            <a href="/create-post" class="btn">New Post</a>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 0.5rem;">Create Project Update</h3>
+            <p style="color: var(--beige-600); margin-bottom: 1rem;">Share project progress</p>
+            <a href="/create-update" class="btn">New Update</a>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 0.5rem;">Sync from GitHub</h3>
+            <p style="color: var(--beige-600); margin-bottom: 1rem;">Import commits automatically</p>
+            <button class="btn" onclick="showGitHubSync()">Sync Now</button>
+        </div>
+    </div>
+
+    <div id="githubSyncModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 1000; padding: 2rem;">
+        <div class="card" style="max-width: 500px; margin: 4rem auto;">
+            <h3 style="margin-bottom: 1.5rem;">Sync from GitHub</h3>
+            <form id="githubSyncForm">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Repository Owner</label>
+                    <input type="text" id="owner" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Repository Name</label>
+                    <input type="text" id="repo" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Project Name</label>
+                    <input type="text" id="projectName" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Number of Commits</label>
+                    <input type="number" id="limit" value="10" min="1" max="50" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px;">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn">Sync</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideGitHubSync()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <section>
+        <h2 style="margin-bottom: 1.5rem;">Quick Stats</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <div class="card">
+                <h4 style="color: var(--beige-600); margin-bottom: 0.5rem;">Total Posts</h4>
+                <p style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="totalPosts">-</p>
+            </div>
+            <div class="card">
+                <h4 style="color: var(--beige-600); margin-bottom: 0.5rem;">Total Updates</h4>
+                <p style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="totalUpdates">-</p>
+            </div>
+            <div class="card">
+                <h4 style="color: var(--beige-600); margin-bottom: 0.5rem;">Total Views</h4>
+                <p style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="totalViews">-</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        function showGitHubSync() {
+            document.getElementById('githubSyncModal').style.display = 'block';
+        }
+
+        function hideGitHubSync() {
+            document.getElementById('githubSyncModal').style.display = 'none';
+        }
+
+        document.getElementById('githubSyncForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const syncData = {
+                owner: document.getElementById('owner').value,
+                repo: document.getElementById('repo').value,
+                projectName: document.getElementById('projectName').value,
+                limit: parseInt(document.getElementById('limit').value)
+            };
+
+            try {
+                const response = await fetch('/api/projects/sync-github', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(syncData)
+                });
+
+                if (response.ok) {
+                    alert('GitHub sync successful!');
+                    hideGitHubSync();
+                    loadStats();
+                } else {
+                    alert('Sync failed. Check your GitHub settings.');
+                }
+            } catch (error) {
+                alert('An error occurred during sync.');
+            }
+        });
+
+        async function loadStats() {
+            try {
+                const [postsRes, updatesRes] = await Promise.all([
+                    fetch('/api/posts'),
+                    fetch('/api/projects')
+                ]);
+
+                const posts = await postsRes.json();
+                const updates = await updatesRes.json();
+
+                document.getElementById('totalPosts').textContent = posts.length;
+                document.getElementById('totalUpdates').textContent = updates.length;
+
+                const totalViews = posts.reduce((sum, p) => sum + (p.viewCount || 0), 0) +
+                                  updates.reduce((sum, u) => sum + (u.viewCount || 0), 0);
+                document.getElementById('totalViews').textContent = totalViews;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        loadStats();
+    </script>
+</th:block>
+</body>
+</html>
