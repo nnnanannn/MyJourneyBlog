@@ -31,6 +31,7 @@
             background-color: var(--beige-50);
             color: var(--beige-900);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         .container {
@@ -40,7 +41,7 @@
 
         /* Sidebar */
         .sidebar {
-            width: 280px;
+            width: 250px;
             background-color: var(--beige-100);
             border-right: 1px solid var(--beige-300);
             position: fixed;
@@ -104,7 +105,7 @@
 
         /* Main Content */
         .main-content {
-            margin-left: 280px;
+            margin-left: 300px;
             flex: 1;
             padding: 2rem 3rem;
             max-width: 1200px;
@@ -225,7 +226,8 @@
         <nav>
             <div class="nav-section">
                 <div class="nav-section-title">Main</div>
-                <a href="/" class="nav-link" th:classappend="${#request.requestURI == '/' ? 'active' : ''}">Home</a>
+                <a href="/" class="nav-link">Home</a>
+<!--                <a href="/" class="nav-link" th:classappend="${#request.requestURI == '/' ? 'active' : ''}">Home</a>-->
             </div>
 
             <div class="nav-section">
@@ -250,9 +252,10 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content">
-        <th:block layout:fragment="content"></th:block>
-    </main>
+    <div class="main-content">
+        <div layout:fragment="content"></div>
+<!--        <th:block layout:fragment="content"></th:block>-->
+    </div>
 </div>
 
 <th:block layout:fragment="extra-js"></th:block>

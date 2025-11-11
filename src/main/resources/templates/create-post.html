@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Create Learning Post - My Learning Journey</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Create Learning Post</h1>
+        <p>Document your daily learning progress</p>
+    </div>
+
+    <div class="card" style="max-width: 900px; margin: 0 auto;">
+        <form id="createPostForm">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Title *</label>
+                <input type="text" id="title" required
+                       placeholder="What did you learn today?"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Topic *</label>
+                <input type="text" id="topic" required
+                       placeholder="e.g., Java, System Design, Spring Boot"
+                       list="topicSuggestions"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+                <datalist id="topicSuggestions">
+                    <option value="Java">
+                    <option value="System Design">
+                    <option value="Spring Boot">
+                    <option value="Algorithms">
+                    <option value="Data Structures">
+                    <option value="Database">
+                    <option value="Web Development">
+                </datalist>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Learning Date *</label>
+                <input type="date" id="learningDate" required
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Content *</label>
+                <div id="editor" style="height: 400px; background-color: white;"></div>
+                <input type="hidden" id="content">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Summary (Optional)</label>
+                <textarea id="summary" rows="3"
+                          placeholder="Brief summary of what you learned..."
+                          style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem; font-family: inherit;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="published" checked>
+                    <span>Publish immediately</span>
+                </label>
+            </div>
+
+            <div id="errorMessage" style="display: none; padding: 0.75rem; background-color: #fee; border: 1px solid #fcc; border-radius: 6px; margin-bottom: 1rem; color: #c00;"></div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn">Create Post</button>
+                <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Post Image (Optional)</label>
+        <input type="file" id="postImage" accept="image/*"
+               style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px;">
+        <small style="color: var(--beige-600); font-size: 0.875rem;">Max size: 10MB</small>
+
+        <div id="imagePreview" style="display: none; margin-top: 1rem;">
+            <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 6px; border: 2px solid var(--beige-300);">
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Set today's date as default
+        document.getElementById('learningDate').valueAsDate = new Date();
+
+        // Initialize Quill editor
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'script': 'sub'}, { 'script': 'super' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Write about what you learned today...'
+        });
+
+        document.getElementById('createPostForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const content = quill.root.innerHTML;
+            const errorDiv = document.getElementById('errorMessage');
+
+            if (quill.getText().trim().length === 0) {
+                errorDiv.textContent = 'Content cannot be empty';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const postData = {
+                title: document.getElementById('title').value,
+                topic: document.getElementById('topic').value,
+                content: content,
+                summary: document.getElementById('summary').value,
+                learningDate: document.getElementById('learningDate').value,
+                published: document.getElementById('published').checked
+            };
+
+            try {
+                const response = await fetch('/api/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(postData)
+                });
+
+                if (response.ok) {
+                    const post = await response.json();
+                    alert('Post created successfully!');
+                    window.location.href = '/learning/post/' + post.id;
+                } else {
+                    const error = await response.text();
+                    errorDiv.textContent = error || 'Failed to create post';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Add image preview
+document.getElementById('postImage').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Update form submission to include image
+document.getElementById('createPostForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const content = quill.root.innerHTML;
+    const errorDiv = document.getElementById('errorMessage');
+
+    if (quill.getText().trim().length === 0) {
+        errorDiv.textContent = 'Content cannot be empty';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    // Upload image first if present
+    let imageUrl = null;
+    const imageFile = document.getElementById('postImage').files[0];
+
+    if (imageFile) {
+        const formData = new FormData();
+        formData.append('file', imageFile);
+
+        try {
+            const imgResponse = await fetch('/api/files/upload/post-image', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                body: formData
+            });
+
+            if (imgResponse.ok) {
+                const imgData = await imgResponse.json();
+                imageUrl = imgData.fileUrl;
+            }
+        } catch (error) {
+            console.error('Image upload failed:', error);
+        }
+    }
+
+    // Create post with image URL
+    const postData = {
+        title: document.getElementById('title').value,
+        topic: document.getElementById('topic').value,
+        content: content,
+        summary: document.getElementById('summary').value,
+        learningDate: document.getElementById('learningDate').value,
+        imageUrl: imageUrl,  // Add this
+        published: document.getElementById('published').checked
+    };
+
+    try {
+        const response = await fetch('/api/posts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(postData)
+        });
+
+        if (response.ok) {
+            const post = await response.json();
+            alert('Post created successfully!');
+            window.location.href = '/learning/post/' + post.id;
+        } else {
+            const error = await response.text();
+            errorDiv.textContent = error || 'Failed to create post';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        errorDiv.textContent = 'An error occurred. Please try again.';
+        errorDiv.style.display = 'block';
+    }
+});
+
+    </script>
+</th:block>
+</body>
+</html>

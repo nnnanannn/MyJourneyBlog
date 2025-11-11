@@ -83,10 +83,150 @@
             </div>
         </div>
     </section>
+
+    <section style="margin-top: 3rem;">
+        <h2 style="margin-bottom: 1.5rem;">Profile Settings</h2>
+        <div class="card" style="max-width: 600px;">
+            <h3 style="margin-bottom: 1rem;">Profile Image</h3>
+
+            <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 1.5rem;">
+                <div id="profileImagePreview" style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--beige-300); background-color: var(--beige-100); display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 3rem; color: var(--beige-400);">👤</span>
+                </div>
+
+                <div style="flex: 1;">
+                    <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                    <button class="btn" onclick="document.getElementById('profileImageInput').click()">
+                        Choose Image
+                    </button>
+                    <p style="font-size: 0.875rem; color: var(--beige-600); margin-top: 0.5rem;">
+                        Max size: 5MB. Allowed: JPG, PNG, GIF
+                    </p>
+                </div>
+            </div>
+
+            <div id="uploadProgress" style="display: none; margin-top: 1rem;">
+                <div style="background-color: var(--beige-200); border-radius: 4px; overflow: hidden; height: 8px;">
+                    <div id="progressBar" style="background-color: var(--accent); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+                <p style="text-align: center; margin-top: 0.5rem; font-size: 0.875rem; color: var(--beige-600);">
+                    Uploading...
+                </p>
+            </div>
+
+            <div id="uploadError" style="display: none; padding: 0.75rem; background-color: #fee; border: 1px solid #fcc; border-radius: 6px; margin-top: 1rem; color: #c00;"></div>
+
+            <div id="uploadSuccess" style="display: none; padding: 0.75rem; background-color: #efe; border: 1px solid #cfc; border-radius: 6px; margin-top: 1rem; color: #060;"></div>
+        </div>
+    </section>
+
 </div>
 
 <th:block layout:fragment="extra-js">
     <script>
+
+        const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+    }
+
+    // Load current profile image
+    async function loadProfileImage() {
+        try {
+            const response = await fetch('/api/users/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                if (user.profileImageUrl) {
+                    document.getElementById('profileImagePreview').innerHTML =
+                        `<img src="${user.profileImageUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading profile image:', error);
+        }
+    }
+
+    // Handle profile image upload
+    document.getElementById('profileImageInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const errorDiv = document.getElementById('uploadError');
+        const successDiv = document.getElementById('uploadSuccess');
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+
+        // Hide previous messages
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            errorDiv.textContent = 'File size must be less than 5MB';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            errorDiv.textContent = 'Please select an image file';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('profileImagePreview').innerHTML =
+                `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        };
+        reader.readAsDataURL(file);
+
+        // Upload file
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '50%';
+
+            const response = await fetch('/api/users/me/profile-image', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                body: formData
+            });
+
+            progressBar.style.width = '100%';
+
+            if (response.ok) {
+                const data = await response.json();
+                successDiv.textContent = 'Profile image updated successfully!';
+                successDiv.style.display = 'block';
+                progressDiv.style.display = 'none';
+            } else {
+                const error = await response.text();
+                errorDiv.textContent = error || 'Upload failed';
+                errorDiv.style.display = 'block';
+                progressDiv.style.display = 'none';
+            }
+        } catch (error) {
+            errorDiv.textContent = 'An error occurred during upload';
+            errorDiv.style.display = 'block';
+            progressDiv.style.display = 'none';
+        }
+    });
+
+    // Load profile image on page load
+    loadProfileImage();
+    loadStats();
+
+
+
         const token = localStorage.getItem('token');
         if (!token) {
             window.location.href = '/login';

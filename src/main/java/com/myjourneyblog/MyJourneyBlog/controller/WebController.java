@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,5 +74,15 @@ public class WebController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         return "dashboard";
+    }
+
+    @GetMapping("/create-post")
+    public String createPost() {
+        return "create-post";
+    }
+
+    @GetMapping("/test")
+    String index(Principal principal) {
+        return principal != null ? "homeSignedIn" : "homeNotSignedIn";
     }
 }
