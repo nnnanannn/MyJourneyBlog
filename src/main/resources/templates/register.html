@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Register - Developer Learning Journey</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Create Account</h1>
+        <p>Join and start documenting your developer journey</p>
+    </div>
+
+    <div class="card" style="max-width: 500px; margin: 2rem auto;">
+        <form id="registerForm">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Username *</label>
+                <input type="text" id="username" name="username" required
+                       minlength="3" maxlength="50"
+                       placeholder="Choose a unique username"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+                <small style="color: var(--beige-600); font-size: 0.875rem;">At least 3 characters</small>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Email *</label>
+                <input type="email" id="email" name="email" required
+                       placeholder="your.email@example.com"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Full Name *</label>
+                <input type="text" id="fullName" name="fullName" required
+                       placeholder="Your full name"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Password *</label>
+                <input type="password" id="password" name="password" required
+                       minlength="6"
+                       placeholder="At least 6 characters"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+                <small style="color: var(--beige-600); font-size: 0.875rem;">Minimum 6 characters</small>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Confirm Password *</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required
+                       placeholder="Repeat your password"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div id="errorMessage" style="display: none; padding: 0.75rem; background-color: #fee; border: 1px solid #fcc; border-radius: 6px; margin-bottom: 1rem; color: #c00;"></div>
+
+            <div id="successMessage" style="display: none; padding: 0.75rem; background-color: #efe; border: 1px solid #cfc; border-radius: 6px; margin-bottom: 1rem; color: #060;"></div>
+
+            <button type="submit" class="btn" style="width: 100%;">Create Account</button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; color: var(--beige-600);">
+            Already have an account? <a href="/login" style="color: var(--accent);">Login here</a>
+        </p>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const registerData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                fullName: document.getElementById('fullName').value,
+                password: password
+            };
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registerData)
+                });
+
+                if (response.ok) {
+                    successDiv.textContent = 'Account created successfully! Redirecting to login...';
+                    successDiv.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    const error = await response.text();
+                    errorDiv.textContent = error || 'Registration failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

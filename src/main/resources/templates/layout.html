@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -228,25 +229,31 @@
                 <div class="nav-section-title">Main</div>
                 <a href="/" class="nav-link">Home</a>
 <!--                <a href="/" class="nav-link" th:classappend="${#request.requestURI == '/' ? 'active' : ''}">Home</a>-->
+<!--                <a th:href="@{/home}"th:classappend="${activePage == 'home' ? 'active' : ''}">-->
+<!--                    <span>Home</span>-->
+<!--                </a>-->
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">Learning Journey</div>
-                <a href="/learning/by-date" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/learning/by-date') ? 'active' : ''}">By Date</a>
-                <a href="/learning/by-topic" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/learning/by-topic') ? 'active' : ''}">By Topic</a>
+                <a href="/learning/by-date" class="nav-link">By Date</a>
+
+<!--                <a href="/learning/by-date" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/learning/by-date') ? 'active' : ''}">By Date</a>-->
+<!--                <a href="/learning/by-topic" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/learning/by-topic') ? 'active' : ''}">By Topic</a>-->
             </div>
 
-            <div class="nav-section">
-                <div class="nav-section-title">Projects</div>
-                <a href="/projects/by-date" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/projects/by-date') ? 'active' : ''}">By Date</a>
-                <a href="/projects/by-project" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/projects/by-project') ? 'active' : ''}">By Project</a>
-            </div>
+<!--            <div class="nav-section">-->
+<!--                <div class="nav-section-title">Projects</div>-->
+<!--                <a href="/projects/by-date" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/projects/by-date') ? 'active' : ''}">By Date</a>-->
+<!--                <a href="/projects/by-project" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/projects/by-project') ? 'active' : ''}">By Project</a>-->
+<!--            </div>-->
         </nav>
 
         <div class="auth-section">
             <div class="auth-buttons">
                 <a href="/dashboard" class="btn">Dashboard</a>
                 <a href="/login" class="btn-secondary btn">Login</a>
+                <a href="/register" class="btn-secondary btn">Register</a>
             </div>
         </div>
     </aside>

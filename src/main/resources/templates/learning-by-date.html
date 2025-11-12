@@ -1,0 +1,58 @@
+<!-- learning-by-date.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+<!--    <link rel="stylesheet" th:href="@{/css/style.css}">-->
+    <title>Learning by Date - Developer Learning Journey</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Learning Journey by Date</h1>
+        <p>Browse your learning progress chronologically</p>
+    </div>
+
+    <div th:if="${postsByDate != null and !postsByDate.isEmpty()}">
+        <div th:each="entry : ${postsByDate}" style="margin-bottom: 3rem;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--beige-300);">
+                <span th:text="${#temporals.format(entry.key, 'EEEE, MMMM dd, yyyy')}">Date</span>
+                <span style="font-size: 1rem; font-weight: normal; color: var(--beige-600); margin-left: 1rem;"
+                      th:text="${entry.value.size()} + ' post' + (${entry.value.size() > 1} ? 's' : '')">
+                    </span>
+            </h2>
+
+            <div th:each="post : ${entry.value}" class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                    <a th:href="@{/learning/post/{id}(id=${post.id})}"
+                       style="text-decoration: none; color: var(--beige-900);">
+                        <h3 class="card-title" th:text="${post.title}">Post Title</h3>
+                    </a>
+                    <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
+                          th:text="${post.topic}">Topic</span>
+                </div>
+                <div class="card-meta">
+                    <span th:text="${post.viewCount} + ' views'">0 views</span>
+                </div>
+                <div class="card-content">
+                    <p th:text="${post.summary != null ? post.summary : #strings.abbreviate(post.content, 200)}">
+                        Summary...
+                    </p>
+                </div>
+                <a th:href="@{/learning/post/{id}(id=${post.id})}"
+                   style="color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 1rem; display: inline-block;">
+                    Read more →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${postsByDate == null or postsByDate.isEmpty()}" class="card">
+        <p style="color: var(--beige-600); text-align: center;">
+            No learning posts yet. <a href="/create-post" style="color: var(--accent);">Create your first post!</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>
