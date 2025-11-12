@@ -52,7 +52,7 @@ public class WebController {
         // Add data to model for Thymeleaf to use
         model.addAttribute("recentPosts", recentPosts);
         model.addAttribute("recentUpdates", recentUpdates);
-        model.addAttribute("currentPage", "home");
+        model.addAttribute("activePage", "home");
 
         //model.addAttribute("recentPosts", learningPostService.getAllPosts());
         //model.addAttribute("recentUpdates", projectUpdateService.getAllUpdates());
@@ -79,6 +79,21 @@ public class WebController {
     @GetMapping("/create-post")
     public String createPost() {
         return "create-post";
+    }
+
+    @GetMapping("/learning/by-date")
+    public String learningByDate(Model model) {
+        List<LearningPostDTO> recentPosts = learningPostService.getAllPosts()
+                .stream()
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .limit(5)
+                .collect(Collectors.toList());
+
+        // Add data to model for Thymeleaf to use
+        model.addAttribute("recentPosts", recentPosts);
+        model.addAttribute("activePage", "by-date");
+
+        return "learning-by-date";
     }
 
     @GetMapping("/test")
