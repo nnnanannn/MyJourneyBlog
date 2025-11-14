@@ -88,6 +88,13 @@ public class AuthServiceImpl implements AuthService {
                 Collections.singletonList(new SimpleGrantedAuthority(savedUser.getRole().name())));
         String token = jwtTokenProvider.generateToken(authentication);
 
+        // Send welcome email (async - doesn't block)
+        emailService.sendWelcomeEmail(
+                savedUser.getEmail(),
+                savedUser.getUsername(),
+                savedUser.getFullname()
+        );
+
         return AuthResponse.builder()
                 .token(token)
                 .tokenType("Bearer")
