@@ -1,5 +1,7 @@
 package com.myjourneyblog.MyJourneyBlog.dto;
 
+import com.myjourneyblog.MyJourneyBlog.model.User;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -37,4 +39,11 @@ public class UserRegistrationDTO {
 
     @Schema(description = "User bio", example = "Software developer learning Spring Boot")
     private String bio;
+
+    private User user;
+
+    @NotBlank(message = "Password is required") @Size(min = 6, message = "Password must be at least 6 characters")
+    public String getConfirmPassword() {
+        return user.getPassword();
+    }
 }

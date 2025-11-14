@@ -1,6 +1,7 @@
 package com.myjourneyblog.MyJourneyBlog.model;
 
 
+import com.myjourneyblog.MyJourneyBlog.security.JwtTokenProvider;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -64,6 +65,14 @@ public class User implements UserDetails {
     @Builder.Default
     private Role role = Role.ROLE_USER;
 
+    // ========== User Authentication ==========
+
+    private String resetToken;
+
+    private LocalDateTime resetTokenExpiry;
+
+    private boolean accountNonLocked;
+
     // ========== RELATIONSHIP TO LEARNING POSTS ==========
 
     @OneToMany(
@@ -94,6 +103,8 @@ public class User implements UserDetails {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    private LocalDateTime lastLogin;
 
     // ========== CONVENIENCE METHODS ==========
 

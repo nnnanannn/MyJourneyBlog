@@ -1,5 +1,6 @@
 package com.myjourneyblog.MyJourneyBlog.dto;
 
+import com.myjourneyblog.MyJourneyBlog.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,4 +16,6 @@ public class AuthResponse {
     private String username;
     private String email;
     private String message;
+    private String fullname;
+    private Role role;
 }
