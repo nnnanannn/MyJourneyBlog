@@ -1,5 +1,7 @@
 package com.myjourneyblog.MyJourneyBlog.model;
 
+import com.myjourneyblog.MyJourneyBlog.dto.LearningPostDTO;
+import com.myjourneyblog.MyJourneyBlog.repository.LearningPostRepository;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -88,5 +90,4 @@ public class LearningPost {
             this.viewCount = 0;
         }
     }
-
 }

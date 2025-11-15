@@ -41,6 +41,9 @@ public interface LearningPostRepository extends JpaRepository<LearningPost, Long
 
     Page<LearningPost> findByAuthorUsername(String username, Pageable pageable);
 
+    // Explicitly declared just for notice in learning phase !!
+    boolean existsById(Long id);
+
     // ========== CUSTOM @Query METHODS ==========
 
 

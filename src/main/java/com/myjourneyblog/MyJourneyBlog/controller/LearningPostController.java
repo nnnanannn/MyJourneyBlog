@@ -4,6 +4,7 @@ import com.myjourneyblog.MyJourneyBlog.dto.ErrorResponse;
 import com.myjourneyblog.MyJourneyBlog.dto.LearningPostDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.PageResponse;
 import com.myjourneyblog.MyJourneyBlog.model.LearningPost;
+import com.myjourneyblog.MyJourneyBlog.repository.LearningPostRepository;
 import com.myjourneyblog.MyJourneyBlog.security.UserPrincipal;
 import com.myjourneyblog.MyJourneyBlog.service.LearningPostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +27,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST API for LearningPost operations
@@ -38,6 +41,7 @@ import java.util.List;
 public class LearningPostController {
 
     private final LearningPostService learningPostService;
+    private final LearningPostRepository learningPostRepository;
 
     /**
      * Create new learning post
@@ -146,6 +150,28 @@ public class LearningPostController {
             @PathVariable Long id) {
         LearningPostDTO post = learningPostService.getPostById(id);
         return ResponseEntity.ok(post);
+    }
+
+    /**
+     * Test endpoint to check if a post is published (exists in database)
+     */
+    @GetMapping("/test/ispublished/{id}")
+    public ResponseEntity<Map<String, Object>> testIsPublished(@PathVariable Long id) {
+        boolean isPublished = learningPostRepository.existsById(id);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("postId", id);
+        response.put("isPublished", isPublished);
+
+        if (isPublished) {
+            LearningPostDTO post = learningPostService.getPostById(id);
+            response.put("message", "Post exists in database");
+            response.put("title", post.getTitle());
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "Post not found in database");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 
     /**

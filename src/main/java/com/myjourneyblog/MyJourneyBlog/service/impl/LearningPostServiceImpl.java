@@ -49,7 +49,8 @@ public class LearningPostServiceImpl implements LearningPostService {
         log.info("Learning post created with ID: {}", savedPost.getId());
 
         // Send email if post is published
-        if (savedPost.isPublished()) {
+        // (Verify post was saved and send email
+        if (isPublished(savedPost.getId())) {
             emailService.sendPostPublishedEmail(
                     author.getEmail(),
                     author.getUsername(),
@@ -59,6 +60,10 @@ public class LearningPostServiceImpl implements LearningPostService {
         }
 
         return toDTO(savedPost);
+    }
+
+    public boolean isPublished(Long postId) {
+        return learningPostRepository.existsById(postId);
     }
 
     @Override
