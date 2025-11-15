@@ -55,7 +55,7 @@ public class EmailService {
      * Send welcome email to new user
      */
     public void sendWelcomeEmail(String to, String username, String fullName) {
-        String subject = "Welcome to Developer Journey! 🎉";
+        String subject = "Welcome to My Journey Blog! 🎉";
         String htmlContent = buildWelcomeEmail(username, fullName);
         sendEmail(to, subject, htmlContent);
     }
@@ -102,7 +102,7 @@ public class EmailService {
                 "</head>" +
                 "<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>" +
                 "    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;'>" +
-                "        <h1 style='color: white; margin: 0; font-size: 28px;'>Welcome to Developer Journey! 🎉</h1>" +
+                "        <h1 style='color: white; margin: 0; font-size: 28px;'>Welcome to My Journey Blog! 🎉</h1>" +
                 "    </div>" +
                 "    <div style='background-color: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;'>" +
                 "        <p style='font-size: 18px; margin-bottom: 20px;'>Hi " + fullName + "!</p>" +
@@ -114,7 +114,7 @@ public class EmailService {
                 "                <li style='margin-bottom: 10px;'>📝 Create your first learning post</li>" +
                 "                <li style='margin-bottom: 10px;'>🚀 Share project updates</li>" +
                 "                <li style='margin-bottom: 10px;'>📷 Upload a profile picture</li>" +
-                "                <li style='margin-bottom: 10px;'>🔍 Explore other developers' journeys</li>" +
+                "                <li style='margin-bottom: 10px;'>🔍 Explore other's journeys</li>" +
                 "            </ul>" +
                 "        </div>" +
                 "        <div style='text-align: center; margin-top: 30px;'>" +
@@ -123,8 +123,8 @@ public class EmailService {
                 "        <p style='margin-top: 30px; font-size: 14px; color: #666;'>Happy learning!<br>The Developer Journey Team</p>" +
                 "    </div>" +
                 "    <div style='text-align: center; padding: 20px; font-size: 12px; color: #999;'>" +
-                "        <p>You received this email because you registered at Developer Journey.</p>" +
-                "        <p>© 2025 Developer Journey. All rights reserved.</p>" +
+                "        <p>You received this email because you registered at My Journey Blog.</p>" +
+                "        <p>© 2025 My Journey Blog. All rights reserved.</p>" +
                 "    </div>" +
                 "</body>" +
                 "</html>";

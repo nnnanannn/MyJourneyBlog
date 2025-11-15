@@ -6,6 +6,7 @@ import com.myjourneyblog.MyJourneyBlog.model.LearningPost;
 import com.myjourneyblog.MyJourneyBlog.model.User;
 import com.myjourneyblog.MyJourneyBlog.repository.LearningPostRepository;
 import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
+import com.myjourneyblog.MyJourneyBlog.service.EmailService;
 import com.myjourneyblog.MyJourneyBlog.service.LearningPostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class LearningPostServiceImpl implements LearningPostService {
 
     private final LearningPostRepository learningPostRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -45,6 +47,16 @@ public class LearningPostServiceImpl implements LearningPostService {
 
         LearningPost savedPost = learningPostRepository.save(post);
         log.info("Learning post created with ID: {}", savedPost.getId());
+
+        // Send email if post is published
+        if (savedPost.isPublished()) {
+            emailService.sendPostPublishedEmail(
+                    author.getEmail(),
+                    author.getUsername(),
+                    savedPost.getTitle(),
+                    savedPost.getId()
+            );
+        }
 
         return toDTO(savedPost);
     }
