@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Email Preferences - Developer Learning Journey</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Email Preferences</h1>
+        <p>Manage your email notifications</p>
+    </div>
+
+    <div class="card" style="max-width: 600px;">
+        <form id="emailPreferencesForm">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background-color: var(--beige-50); border-radius: 6px; cursor: pointer;">
+                    <input type="checkbox" id="welcomeEmails" checked>
+                    <div>
+                        <strong style="display: block;">Welcome Emails</strong>
+                        <small style="color: var(--beige-600);">Receive welcome email when you join</small>
+                    </div>
+                </label>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background-color: var(--beige-50); border-radius: 6px; cursor: pointer;">
+                    <input type="checkbox" id="postNotifications" checked>
+                    <div>
+                        <strong style="display: block;">Post Notifications</strong>
+                        <small style="color: var(--beige-600);">Get notified when your posts are published</small>
+                    </div>
+                </label>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background-color: var(--beige-50); border-radius: 6px; cursor: pointer;">
+                    <input type="checkbox" id="followerNotifications" checked>
+                    <div>
+                        <strong style="display: block;">Follower Notifications</strong>
+                        <small style="color: var(--beige-600);">Get notified when someone follows you</small>
+                    </div>
+                </label>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background-color: var(--beige-50); border-radius: 6px; cursor: pointer;">
+                    <input type="checkbox" id="weeklyDigest">
+                    <div>
+                        <strong style="display: block;">Weekly Digest</strong>
+                        <small style="color: var(--beige-600);">Receive weekly summary of your progress</small>
+                    </div>
+                </label>
+            </div>
+
+            <button type="submit" class="btn">Save Preferences</button>
+        </form>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Load preferences
+        async function loadPreferences() {
+            try {
+                const response = await fetch('/api/users/me/email-preferences', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const prefs = await response.json();
+                    document.getElementById('welcomeEmails').checked = prefs.welcomeEmails;
+                    document.getElementById('postNotifications').checked = prefs.postNotifications;
+                    document.getElementById('followerNotifications').checked = prefs.followerNotifications;
+                    document.getElementById('weeklyDigest').checked = prefs.weeklyDigest;
+                }
+            } catch (error) {
+                console.error('Error loading preferences:', error);
+            }
+        }
+
+        // Save preferences
+        document.getElementById('emailPreferencesForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const preferences = {
+                welcomeEmails: document.getElementById('welcomeEmails').checked,
+                postNotifications: document.getElementById('postNotifications').checked,
+                followerNotifications: document.getElementById('followerNotifications').checked,
+                weeklyDigest: document.getElementById('weeklyDigest').checked
+            };
+
+            try {
+                const response = await fetch('/api/users/me/email-preferences', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(preferences)
+                });
+
+                if (response.ok) {
+                    alert('Email preferences saved!');
+                }
+            } catch (error) {
+                alert('Failed to save preferences');
+            }
+        });
+
+        loadPreferences();
+    </script>
+</th:block>
+</body>
+</html>
