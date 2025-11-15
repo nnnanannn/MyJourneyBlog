@@ -9,7 +9,7 @@
 <div layout:fragment="content">
     <div class="page-header">
         <h1>Create Account</h1>
-        <p>Join and start documenting your developer journey</p>
+        <p>Join and start documenting your journey</p>
     </div>
 
     <div class="card" style="max-width: 500px; margin: 2rem auto;">
@@ -64,10 +64,12 @@
             Already have an account? <a href="/login" style="color: var(--accent);">Login here</a>
         </p>
     </div>
-</div>
 
-<th:block layout:fragment="extra-js">
+
+<!--<th:block layout:fragment="extra-js">-->
     <script>
+        console.log('Register script loaded');
+
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -88,9 +90,12 @@
             const registerData = {
                 username: document.getElementById('username').value,
                 email: document.getElementById('email').value,
-                fullName: document.getElementById('fullName').value,
-                password: password
+                fullname: document.getElementById('fullName').value,
+                password: password,
+                confirmPassword: confirmPassword
             };
+
+            console.log('Sending registration data:', registerData); // Debug log
 
             try {
                 const response = await fetch('/api/auth/register', {
@@ -118,6 +123,7 @@
             }
         });
     </script>
-</th:block>
+</div>
+<!--</th:block>-->
 </body>
 </html>

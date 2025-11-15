@@ -16,14 +16,14 @@ import java.util.List;
 
 public interface UserService {
 
-    /**
-     * Register a new user
-     * @param registrationDTO user registration data
-     * @return created user response
-     * @throws DuplicateResourceException if username or email already exist
-     * @throws ValidationException if validation fails
-     */
-    UserResponseDTO registerUser(UserRegistrationDTO registrationDTO);
+//    /**
+//     * Register a new user
+//     * @param registrationDTO user registration data
+//     * @return created user response
+//     * @throws DuplicateResourceException if username or email already exist
+//     * @throws ValidationException if validation fails
+//     */
+    // UserResponseDTO registerUser(UserRegistrationDTO registrationDTO);
 
     /**
      * Get user by ID

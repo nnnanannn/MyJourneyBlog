@@ -73,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullname(request.getFullname())
-                .role(Role.valueOf("ROLE_USER"))
+                .role(Role.ROLE_USER)
                 .accountNonLocked(true)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -148,7 +148,7 @@ public class AuthServiceImpl implements AuthService {
 
             return AuthResponse.builder()
                     .token(token)
-                    .token("Bearer")
+                    .tokenType("Bearer")
                     .username(user.getUsername())
                     .email(user.getEmail())
                     .fullname(user.getFullname())
@@ -202,10 +202,10 @@ public class AuthServiceImpl implements AuthService {
 
         return AuthResponse.builder()
                 .token(newToken)
-                .token("Bearer")
+                .tokenType("Bearer")
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .username(user.getFullname())
+                .fullname(user.getFullname())
                 .role(user.getRole())
                 .message("Token refreshed successfully")
                 .build();

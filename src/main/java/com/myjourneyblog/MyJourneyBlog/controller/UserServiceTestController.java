@@ -26,11 +26,11 @@ public class UserServiceTestController {
 
     private final UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserRegistrationDTO registrationDTO) {
-        UserResponseDTO user = userService.registerUser(registrationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
-    }
+//    @PostMapping("/register")
+//    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserRegistrationDTO registrationDTO) {
+//        UserResponseDTO user = userService.registerUser(registrationDTO);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserByID(@PathVariable Long id) {

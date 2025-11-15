@@ -112,42 +112,42 @@ public class UserServiceImpl implements UserService {
 //    }
 
 
-    @Override
-    @Transactional
-    public UserResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
-        log.info("Registering new user with username: {}", registrationDTO.getUsername());
-        
-        // Validate username doesn't exist
-        // Fail fast! Don't attempt database operation if validation fails
-        if (userRepository.existsByUsername(registrationDTO.getUsername())) {
-            log.warn("Username already exists: {}", registrationDTO.getUsername());
-            throw new DuplicateResourceException("User", "username", registrationDTO.getUsername());
-        }
-        
-        // Validate email doesn't exist
-        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
-            log.warn("Email already exists: {}", registrationDTO.getEmail());
-            throw new DuplicateResourceException("User", "email", registrationDTO.getEmail());
-        }
-        
-        // Additional business validation
-        validatePassword(registrationDTO.getPassword());
-
-        // Create user entity with ENCRYPTED password
-        User user = User.builder()
-                .username(registrationDTO.getUsername())
-                .email(registrationDTO.getEmail())
-                .password(passwordEncoder.encode(registrationDTO.getPassword())) // ENCRYPT!
-                .fullname(registrationDTO.getFullname())
-                .bio(registrationDTO.getBio())
-                .build();
-
-        // Save user
-        User savedUser = userRepository.save(user);
-        log.info("User registered successfully with ID: {}", savedUser.getId());
-
-        return toResponseDTO(savedUser);
-    }
+//    @Override
+//    @Transactional
+//    public UserResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
+//        log.info("Registering new user with username: {}", registrationDTO.getUsername());
+//
+//        // Validate username doesn't exist
+//        // Fail fast! Don't attempt database operation if validation fails
+//        if (userRepository.existsByUsername(registrationDTO.getUsername())) {
+//            log.warn("Username already exists: {}", registrationDTO.getUsername());
+//            throw new DuplicateResourceException("User", "username", registrationDTO.getUsername());
+//        }
+//
+//        // Validate email doesn't exist
+//        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
+//            log.warn("Email already exists: {}", registrationDTO.getEmail());
+//            throw new DuplicateResourceException("User", "email", registrationDTO.getEmail());
+//        }
+//
+//        // Additional business validation
+//        validatePassword(registrationDTO.getPassword());
+//
+//        // Create user entity with ENCRYPTED password
+//        User user = User.builder()
+//                .username(registrationDTO.getUsername())
+//                .email(registrationDTO.getEmail())
+//                .password(passwordEncoder.encode(registrationDTO.getPassword())) // ENCRYPT!
+//                .fullname(registrationDTO.getFullname())
+//                .bio(registrationDTO.getBio())
+//                .build();
+//
+//        // Save user
+//        User savedUser = userRepository.save(user);
+//        log.info("User registered successfully with ID: {}", savedUser.getId());
+//
+//        return toResponseDTO(savedUser);
+//    }
 
     @Override
     public UserResponseDTO getUserById(Long id) {

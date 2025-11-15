@@ -34,16 +34,12 @@ public class UserRegistrationDTO {
     @Schema(description = "Password (min 6 characters)", example = "password123", required = true)
     private String password;
 
+    @NotBlank(message = "Confirm password is required")
+    private String confirmPassword;
+
     @Schema(description = "Full name", example = "John Doe")
     private String fullname;
 
     @Schema(description = "User bio", example = "Software developer learning Spring Boot")
     private String bio;
-
-    private User user;
-
-    @NotBlank(message = "Password is required") @Size(min = 6, message = "Password must be at least 6 characters")
-    public String getConfirmPassword() {
-        return user.getPassword();
-    }
 }
