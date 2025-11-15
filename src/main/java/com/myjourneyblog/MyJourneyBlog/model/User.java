@@ -67,11 +67,14 @@ public class User implements UserDetails {
 
     // ========== User Authentication ==========
 
+    @Column(name = "reset_token")
     private String resetToken;
 
+    @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
-    private boolean accountNonLocked;
+    @Column(name = "account_non_locked")
+    private Boolean accountNonLocked;
 
     // ========== RELATIONSHIP TO LEARNING POSTS ==========
 
