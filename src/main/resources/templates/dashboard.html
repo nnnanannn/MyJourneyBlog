@@ -85,6 +85,17 @@
     </section>
 
     <section style="margin-top: 3rem;">
+        <h2 style="margin-bottom: 1.5rem;">Cache Performance</h2>
+        <div id="cacheStats"></div>
+        <button class="btn btn-secondary" onclick="refreshCacheStats()" style="margin-top: 1rem;">
+            Refresh Stats
+        </button>
+        <button class="btn btn-secondary" onclick="clearAllCaches()" style="margin-left: 0.5rem;">
+            Clear All Caches
+        </button>
+    </section>
+
+    <section style="margin-top: 3rem;">
         <h2 style="margin-bottom: 1.5rem;">Profile Settings</h2>
         <div class="card" style="max-width: 600px;">
             <h3 style="margin-bottom: 1rem;">Profile Image</h3>
@@ -294,6 +305,121 @@
         }
 
         loadStats();
+
+        // Load cache statistics
+        async function loadCacheStats() {
+            try {
+                const response = await fetch('/api/cache/stats', {
+                    headers: { 'Authorization': 'Bearer ' + token }'}
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    displayCacheStats(stats);
+                }
+            } catch (error) {
+                console.error('Error loading cache stats:', error);
+            }
+        }
+
+        // Display cache statistics
+        function displayCacheStats(stats) {
+            const container = document.getElementById('cacheStats');
+
+            if (!stats.length === 0) {
+                container.innerHTML = '<p style="color: var(--beige-600);">No cache data available</p>';
+                return;
+            }
+
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">';
+
+            stats.forEach(cache => {
+                const hitRatePercent = (cache.hitRate * 100).toFixed(1);
+                const totalRequests = cache.hitCount + cache.missCount;
+
+                html += `
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3 style="margin: 0; font-size: 1rem; color: var(--accent);">${cache.cacheName}</h3>
+                            <span style="background-color: ${hitRatePercent > 70 ? '#51cf66' : hitRatePercent > 40 ? '#ffc107' : '#ff6b6b'}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">
+                                ${hitRatePercent}% hit rate
+                            </span>
+                        </div>
+                        <div style="font-size: 0.875rem; color: var(--beige-700);">
+                            <p style="margin: 0.5rem 0;">
+                                <strong>Hits:</strong> ${cache.hitCount.toLocaleString()} / 
+                                <strong>Misses:</strong> ${cache.missCount.toLocaleString()}
+                            </p>
+                            <p style="margin: 0.5rem 0;">
+                                <strong>Total Requests:</strong> ${totalRequests.toLocaleString()}
+                             </p>
+                             <p style="margin: 0.5rem 0;">
+                                <strong>Size:</strong> ${cache.size} entries
+                            </p>
+                            <p style="margin: 0.5rem 0;">
+                                <strong>Evictions:</strong> ${cache.evictionCount.toLocaleString()}
+                            </p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="clearCache('${cache.cacheName}')" style="margin-top: 1rem; width: 100%; font-size: 0.875rem;">
+                        Clear Cache
+                        </button>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Refresh cache stats
+        function refreshCacheStats() {
+        loadCacheStats();
+        }
+
+        // Clear specific cache
+        async function clearCache(cacheName) {
+            if (!confirm(`Are you sure you want to clear the "${cacheName}" cache?`)) return;
+
+            try {
+                const response = await fetch(`/api/cache/${cacheName}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    alert(`Cache "${cacheName}" cleared successfully!`);
+                    loadCacheStats();
+                } else {
+                    alert(`Failed to clear cache "${cacheName}".`);
+                }
+            } catch (error) {
+                alert('An error occurred while clearing the cache.');
+            }
+        }
+
+        // Clear all Caches
+        async function clearAllCaches() {
+            if (!confirm('Are you sure you want to clear all caches? This will temporarily slow down the application.')) return;
+
+            try {
+                const response = await fetch('/api/cache', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    alert('All caches cleared successfully!');
+                    loadCacheStats();
+                } else {
+                    alert('Failed to clear all caches.');
+                }
+            } catch (error) {
+                alert('An error occurred while clearing all caches.');
+            }
+        }
+
+        // Load cache stats on page load
+        loadCacheStats();
     </script>
 </th:block>
 </body>
