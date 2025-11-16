@@ -11,9 +11,16 @@ import com.myjourneyblog.MyJourneyBlog.service.LearningPostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,10 +35,17 @@ public class LearningPostServiceImpl implements LearningPostService {
     private final UserRepository userRepository;
     private final EmailService emailService;
 
+    /**
+     * Create post and evict relevant caches
+     */
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "posts", key = "'all-*'", allEntries = true),
+            @CacheEvict(value = "postsByTitle", allEntries = true),
+    })
     public LearningPostDTO createPost(Long authorId, LearningPostDTO postDTO) {
-        log.info("Creating learning post for author ID: {}", authorId);
+        log.info("Creating learning post for author ID: {}, and clearing caches", authorId);
 
         User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", authorId));
@@ -66,13 +80,16 @@ public class LearningPostServiceImpl implements LearningPostService {
         return learningPostRepository.existsById(postId);
     }
 
+    /**
+     * Get post by ID with caching
+     */
     @Override
+    @Cacheable(value = "posts", key = "#id")
     public LearningPostDTO getPostById(Long id) {
         log.debug("Fetching learning post by ID: {}", id);
 
         LearningPost post = learningPostRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("LearningPost", id));
-
         return toDTO(post);
     }
 
@@ -104,10 +121,21 @@ public class LearningPostServiceImpl implements LearningPostService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Update post and refresh cache
+     */
     @Override
     @Transactional
+    @Caching(
+            put = @CachePut(value = "posts", key = "#id"),
+            evict = {
+                    @CacheEvict(value = "posts", key = "'all-*'", allEntries = true),
+                    @CacheEvict(value = "postsByTitle", allEntries = true),
+                    @CacheEvict(value = "searchResults", allEntries = true)
+            }
+    )
     public LearningPostDTO updatePost(Long id, LearningPostDTO postDTO) {
-        log.info("Updating learning post ID: {}", id);
+        log.info("Updating learning post ID: {}, and refreshing caches.", id);
 
         LearningPost post = learningPostRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("LearningPost", id));
@@ -134,10 +162,19 @@ public class LearningPostServiceImpl implements LearningPostService {
         return toDTO(updatedPost);
     }
 
+    /**
+     * Delete post and evict all related caches
+     */
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "posts", key = "#id"),
+            @CacheEvict(value = "posts", key = "'all-*'", allEntries = true),
+            @CacheEvict(value = "postsByTitle", allEntries = true),
+            @CacheEvict(value = "searchResults", allEntries = true)
+    })
     public void deletePost(Long id) {
-        log.info("Deleting learning post ID: {}", id);
+        log.info("Deleting learning post ID: {}, and clearing caches", id);
 
         if (!learningPostRepository.existsById(id)) {
             throw new ResourceNotFoundException("LearningPost", id);
@@ -155,7 +192,47 @@ public class LearningPostServiceImpl implements LearningPostService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Search posts with caching
+     */
+    @Override
+    @Cacheable(value = "searchResults", key = "#keyword + '-' + #page + '-' + #size")
+    public Page<LearningPostDTO> searchPosts(String keyword, int page, int size) {
+        log.info("Searching posts from database: {}", keyword);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("learningDate").descending());
+        Page<LearningPost> posts = learningPostRepository.findByTitleContaining(keyword, pageable);
+
+        return posts.map(this::toDTO);
+    }
+
+    @Override
+    public Page<LearningPostDTO> searchPosts(String keyword, Pageable pageable) {
+        Page<LearningPost> postPage = learningPostRepository.searchByTitleOrContent(keyword, pageable);
+        return postPage.map(this::toDTO);
+    }
+
     // Implement Pageable Methods
+
+    /**
+     * Get all posts with caching
+     * Cache key includes pagination parameters
+     */
+    @Override
+    @Cacheable(value = "posts", key = "'all-' + #page + '-' + #size + '-' + #sortBy + '-' + #direction")
+    public Page<LearningPostDTO> getAllPosts(int page, int size, String sortBy, String direction) {
+        log.info("Fetching all posts from database - page: {}, size: {}", page, size);
+
+        Sort sort = direction.equalsIgnoreCase("DESC")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<LearningPost> posts = learningPostRepository.findAll(pageable);
+
+        return posts.map(this::toDTO);
+    }
+
     @Override
     public Page<LearningPostDTO> getAllPosts(Pageable pageable) {
         log.debug("Fetching learning posts with pagination: page={}, size={}",
@@ -178,10 +255,18 @@ public class LearningPostServiceImpl implements LearningPostService {
         return postPage.map(this::toDTO);
     }
 
+    /**
+     * Get posts by title with caching
+     */
     @Override
-    public Page<LearningPostDTO> searchPosts(String keyword, Pageable pageable) {
-        Page<LearningPost> postPage = learningPostRepository.searchByTitleOrContent(keyword, pageable);
-        return postPage.map(this::toDTO);
+    @Cacheable(value = "postsByTitle", key = "#title + '-' + #page + '-' + #size")
+    public Page<LearningPostDTO> getPostsByTitle(String title, int page, int size) {
+        log.info("Fetching posts by topic from database: {}", title);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("learningDate").descending());
+        Page<LearningPost> posts = learningPostRepository.findByTitleContaining(title, pageable);
+
+        return posts.map(this::toDTO);
     }
 
     private LearningPostDTO toDTO(LearningPost post) {

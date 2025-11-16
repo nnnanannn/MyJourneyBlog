@@ -37,6 +37,8 @@ public interface LearningPostRepository extends JpaRepository<LearningPost, Long
     // Pageable versions of existing methods
     Page<LearningPost> findAll(Pageable pageable);
 
+    Page<LearningPost> findByTitleContaining(String keyword, Pageable pageable);
+
     Page<LearningPost> findByAuthorId(Long authorId, Pageable pageable);
 
     Page<LearningPost> findByAuthorUsername(String username, Pageable pageable);

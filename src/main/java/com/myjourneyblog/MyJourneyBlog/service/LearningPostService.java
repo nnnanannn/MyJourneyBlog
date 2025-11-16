@@ -26,10 +26,14 @@ public interface LearningPostService {
 
     // Pageable methods
     Page<LearningPostDTO> getAllPosts(Pageable pageable);
+    Page<LearningPostDTO> getAllPosts(int page, int size, String sortBy, String direction);
+
+    public Page<LearningPostDTO> getPostsByTitle(String title, int page, int size);
 
     Page<LearningPostDTO> getPostsByAuthor(Long authorId, Pageable pageable);
 
     Page<LearningPostDTO> getPostsByCategory(String category, Pageable pageable);
 
     Page<LearningPostDTO> searchPosts(String keyword, Pageable pageable);
+    Page<LearningPostDTO> searchPosts(String keyword, int page, int size);
 }
