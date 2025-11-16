@@ -174,74 +174,79 @@
         errorDiv.style.display = 'none';
         successDiv.style.display = 'none';
 
-        // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            errorDiv.textContent = 'File size must be less than 5MB';
-            errorDiv.style.display = 'block';
-            return;
-        }
-
         // Validate file type
-        if (!file.type.startsWith('image/')) {
-            errorDiv.textContent = 'Please select an image file';
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            errorDiv.textContent = 'Invalid file type. Only JPG, PNG, and GIF are allowed.';
             errorDiv.style.display = 'block';
             return;
         }
 
-        // Show preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('profileImagePreview').innerHTML =
-                `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
-        };
-        reader.readAsDataURL(file);
+        // Validate file size (5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+            errorDiv.textContent = 'File size exceeds 5MB limit.';
+            errorDiv.style.display = 'block';
+            return;
+        }
 
-        // Upload file
+        // Show progress
+        progressDiv.style.display = 'block';
+
         const formData = new FormData();
         formData.append('file', file);
 
         try {
-            progressDiv.style.display = 'block';
-            progressBar.style.width = '50%';
+            const xhr = new XMLHttpRequest();
 
-            const response = await fetch('/api/users/me/profile-image', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                body: formData
+            // Track upload progress
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                }
             });
 
-            progressBar.style.width = '100%';
+            xhr.onload = async function() {
+                progressDiv.style.display = 'none';
 
-            if (response.ok) {
-                const data = await response.json();
-                successDiv.textContent = 'Profile image updated successfully!';
-                successDiv.style.display = 'block';
+                if (xhr.status === 200) {
+                    const result = JSON.parse(xhr.responseText);
+                    successDiv.textContent = 'Profile image uploaded successfully!';
+                    successDiv.style.display = 'block';
+
+                    // Update preview
+                    document.getElementById('profileImagePreview').innerHTML =
+                        `<img src="${result.imageUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+
+                    // Reload profile data to update header image if applicable
+                    await loadProfileImage();
+                } else {
+                    errorDiv.textContent = 'Upload failed. Please try again.';
+                    errorDiv.style.display = 'block';
+                }
+            };
+
+            xhr.onerror = function() {
                 progressDiv.style.display = 'none';
-            } else {
-                const error = await response.text();
-                errorDiv.textContent = error || 'Upload failed';
+                errorDiv.textContent = 'Network error occurred during upload.';
                 errorDiv.style.display = 'block';
-                progressDiv.style.display = 'none';
-            }
+            };
+
+            xhr.open('POST', '/api/users/profile-image', true);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            xhr.send(formData);
+
         } catch (error) {
-            errorDiv.textContent = 'An error occurred during upload';
-            errorDiv.style.display = 'block';
             progressDiv.style.display = 'none';
+            errorDiv.textContent = 'An error occurred during upload.';
+            errorDiv.style.display = 'block';
+            console.error('Upload error:', error);
         }
     });
 
-    // Load profile image on page load
-    loadProfileImage();
-    loadStats();
-
-
-
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = '/login';
-        }
+        // Load profile image on page load
+        loadProfileImage();
 
         function showGitHubSync() {
             document.getElementById('githubSyncModal').style.display = 'block';
@@ -310,15 +315,21 @@
         async function loadCacheStats() {
             try {
                 const response = await fetch('/api/cache/stats', {
-                    headers: { 'Authorization': 'Bearer ' + token }'}
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
 
                 if (response.ok) {
                     const stats = await response.json();
                     displayCacheStats(stats);
+                } else {
+                    console.error('Failed to load cache stats:', response.status);
+                    document.getElementById('cacheStats').innerHTML =
+                        '<p style="color: #ff6b6b;">Failed to load cache statistics. Please try refreshing.</p>';
                 }
             } catch (error) {
                 console.error('Error loading cache stats:', error);
+                document.getElementById('cacheStats').innerHTML =
+                    '<p style="color: #ff6b6b;">Error loading cache statistics. Please try again.</p>';
             }
         }
 
@@ -326,7 +337,7 @@
         function displayCacheStats(stats) {
             const container = document.getElementById('cacheStats');
 
-            if (!stats.length === 0) {
+            if (!stats || stats.length === 0) {
                 container.innerHTML = '<p style="color: var(--beige-600);">No cache data available</p>';
                 return;
             }
@@ -347,7 +358,7 @@
                         </div>
                         <div style="font-size: 0.875rem; color: var(--beige-700);">
                             <p style="margin: 0.5rem 0;">
-                                <strong>Hits:</strong> ${cache.hitCount.toLocaleString()} / 
+                                <strong>Hits:</strong> ${cache.hitCount.toLocaleString()} /
                                 <strong>Misses:</strong> ${cache.missCount.toLocaleString()}
                             </p>
                             <p style="margin: 0.5rem 0;">
