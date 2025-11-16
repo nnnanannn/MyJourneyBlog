@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
 import java.util.List;
@@ -79,6 +80,12 @@ public class WebController {
     @GetMapping("/create-post")
     public String createPost() {
         return "create-post";
+    }
+
+    @GetMapping("/learning/post/{id}")
+    public String viewPost(@PathVariable Long id, Model model) {
+        model.addAttribute("post", learningPostService.getPostById(id));
+        return "post-detail";
     }
 
     @GetMapping("/learning/by-date")

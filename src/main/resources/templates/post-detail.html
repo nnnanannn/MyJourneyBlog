@@ -1,0 +1,53 @@
+<!-- post-detail.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${post.title} + ' - Developer Learning Journey'">Post - Developer Learning Journey</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <div style="margin-bottom: 1rem;">
+                <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem;"
+                      th:text="${post.title}">Title</span>
+        </div>
+        <h1 th:text="${post.title}">Post Title</h1>
+        <div style="display: flex; gap: 1.5rem; color: var(--beige-600); font-size: 0.875rem;">
+            <span th:text="'By ' + ${post.authorUsername}">Author</span>
+        </div>
+    </div>
+
+    <div class="card">
+<!--        <div th:if="${post.summary != null}" style="padding: 1rem; background-color: var(&#45;&#45;beige-100); border-left: 4px solid var(&#45;&#45;accent); margin-bottom: 2rem; border-radius: 6px;">-->
+<!--            <h3 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Summary</h3>-->
+<!--            <p th:text="${post.summary}" style="margin: 0; color: var(&#45;&#45;beige-700);">Summary text</p>-->
+<!--        </div>-->
+
+        <div class="post-content" th:utext="${post.content}" style="line-height: 1.8;">
+            Post content here...
+        </div>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <a href="/learning/by-date" class="btn btn-secondary">← Back to Learning Journey</a>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-css">
+    <style>
+        .post-content h1 { font-size: 2rem; margin: 1.5rem 0 1rem; }
+        .post-content h2 { font-size: 1.5rem; margin: 1.5rem 0 1rem; }
+        .post-content h3 { font-size: 1.25rem; margin: 1.25rem 0 0.75rem; }
+        .post-content p { margin: 1rem 0; }
+        .post-content ul, .post-content ol { margin: 1rem 0; padding-left: 2rem; }
+        .post-content li { margin: 0.5rem 0; }
+        .post-content code { background-color: var(--beige-100); padding: 0.125rem 0.25rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        .post-content pre { background-color: var(--beige-100); padding: 1rem; border-radius: 6px; overflow-x: auto; }
+        .post-content blockquote { border-left: 4px solid var(--beige-300); padding-left: 1rem; margin: 1rem 0; color: var(--beige-700); font-style: italic; }
+        .post-content img { max-width: 100%; height: auto; border-radius: 6px; margin: 1rem 0; }
+    </style>
+</th:block>
+</body>
+</html>
