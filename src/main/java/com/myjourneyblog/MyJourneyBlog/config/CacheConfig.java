@@ -23,10 +23,11 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
                 "posts",            // Cache for posts
-                "popularPosts",     // Cache for popular posts
                 "users",            // Cache for user profiles
                 "postsByTopic",     // Cache for topic queries
-                "searchResults"     // Cache for search results
+                "searchResults",    // Cache for search results
+                "postsByTitle",     // Cache For findByTitle
+                "githubCommits"     // Cache For GitHub sync data
         );
 
         cacheManager.setCaffeine(caffeineConfig());
