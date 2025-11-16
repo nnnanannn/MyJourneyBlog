@@ -19,6 +19,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -149,7 +153,11 @@ public class UserServiceImpl implements UserService {
 //        return toResponseDTO(savedUser);
 //    }
 
+    /**
+     * Get user by ID with caching
+     */
     @Override
+    @Cacheable(value = "users", key = "#id")
     public UserResponseDTO getUserById(Long id) {
         log.debug("Fetching user by ID: {}", id);
 
@@ -159,7 +167,11 @@ public class UserServiceImpl implements UserService {
         return toResponseDTO(user);
     }
 
+    /**
+     * Get user by username with caching
+     */
     @Override
+    @Cacheable(value = "users", key = "'username-' + #username")
     public UserResponseDTO getUserByUsername(String username) {
         log.debug("Fetching user by username: {}", username);
 
@@ -168,7 +180,6 @@ public class UserServiceImpl implements UserService {
                         String.format("User not found with username: %s", username)));
 
         return toResponseDTO(user);
-
     }
 
     @Override
@@ -181,10 +192,14 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Update user profile and refresh cache
+     */
     @Override
     @Transactional
+    @CachePut(value = "users", key = "#userId")
     public UserResponseDTO updateUser(Long id, UserUpdateDTO updateDTO) {
-        log.info("Updating user with ID: {}", id);
+        log.info("Updating user profile with ID: {}, and refreshing cache", id);
 
         // Find existing user
         User user = userRepository.findById(id)
@@ -267,9 +282,15 @@ public class UserServiceImpl implements UserService {
         // - Must contain special character
     }
 
-    // Method to update profile image:
+    /**
+     * Update profile image and refresh cache
+     */
+    @Override
     @Transactional
+    @CachePut(value = "users", key = "#userId")
     public UserResponseDTO updateProfileImage(Long id, String imageUrl) {
+        log.info("Updating profile image: {}, and refreshing cache", id);
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
