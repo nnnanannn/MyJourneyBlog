@@ -37,6 +37,7 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
         ProjectUpdate projectUpdate = ProjectUpdate.builder()
                 .title(updateDTO.getTitle())
                 .description(updateDTO.getDescription())
+                .projectName(updateDTO.getProjectName())
                 .updateType(updateDTO.getUpdateType())
                 .projectStatus(updateDTO.getProjectStatus())
                 .githubRepoUrl(updateDTO.getGithubRepoUrl())
@@ -44,18 +45,22 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
                 .challengesFaced(updateDTO.getChallengesFaced())
                 .lessonsLearned(updateDTO.getLessonsLearned())
                 .nextSteps(updateDTO.getNextSteps())
+                .author(author)
                 .build();
 
         ProjectUpdate savedProjectUpdate = projectUpdateRepository.save(projectUpdate);
         log.info("Project updated created with ID: {}", savedProjectUpdate.getId());
 
-        return toDTO(projectUpdate);
+        return toDTO(savedProjectUpdate);
     }
 
     @Override
     public List<ProjectUpdateDTO> getUpdatesByProject(String projectName) {
         log.debug("Fetching project update by project name: {}", projectName);
-        return null;
+        return projectUpdateRepository.findByProjectName(projectName)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override

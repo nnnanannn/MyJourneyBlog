@@ -197,7 +197,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    @CachePut(value = "users", key = "#userId")
+    @CachePut(value = "users", key = "#id")
     public UserResponseDTO updateUser(Long id, UserUpdateDTO updateDTO) {
         log.info("Updating user profile with ID: {}, and refreshing cache", id);
 
@@ -287,7 +287,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    @CachePut(value = "users", key = "#userId")
+    @CachePut(value = "users", key = "#id")
     public UserResponseDTO updateProfileImage(Long id, String imageUrl) {
         log.info("Updating profile image: {}, and refreshing cache", id);
 

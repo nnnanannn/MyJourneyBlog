@@ -201,7 +201,8 @@ public class LearningPostServiceImpl implements LearningPostService {
         log.info("Searching posts from database: {}", keyword);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("learningDate").descending());
-        Page<LearningPost> posts = learningPostRepository.findByTitleContaining(keyword, pageable);
+        //Page<LearningPost> posts = learningPostRepository.findByTitleContaining(keyword, pageable);
+        Page<LearningPost> posts = learningPostRepository.searchByTitleOrContent(keyword, pageable);
 
         return posts.map(this::toDTO);
     }

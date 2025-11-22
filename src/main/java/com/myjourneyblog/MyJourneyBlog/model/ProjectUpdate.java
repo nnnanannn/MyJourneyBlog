@@ -55,8 +55,9 @@ public class ProjectUpdate {
     private Integer githubPrNumber;
 
     // Store complex GitHub PR data as JSON
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "github_pr_data", columnDefinition = "jsonb")
+    //@JdbcTypeCode(SqlTypes.JSON)
+    //@Column(name = "github_pr_data", columnDefinition = "jsonb")
+    @Column(name = "github_pr_data", columnDefinition = "TEXT")
     private String githubPrData;
 
     @Column(columnDefinition = "TEXT")
