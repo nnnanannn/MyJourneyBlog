@@ -58,11 +58,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // Public read endpoints
+                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/home/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/projects/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/check/**").permitAll()
 
                         // All other endpoints require authentication
+                                //.anyRequest().permitAll()
                         .anyRequest().authenticated()
                 )
 
