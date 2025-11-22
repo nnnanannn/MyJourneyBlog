@@ -3,6 +3,7 @@ package com.myjourneyblog.MyJourneyBlog.integration;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -32,6 +33,10 @@ public class FileUploadIntegrationTest extends IntegrationTestBase {
 
     @Test
     public void testProfileImageUpload_Unauthorized() throws Exception {
+
+        // Explicitly clear context to force 401 behavior
+        SecurityContextHolder.clearContext();
+
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "profile.jpg",
@@ -41,6 +46,7 @@ public class FileUploadIntegrationTest extends IntegrationTestBase {
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/files/upload/profile-image")
                         .file(file))
+                // Do NOT include Authorization header
                 .andExpect(status().isUnauthorized());
     }
 

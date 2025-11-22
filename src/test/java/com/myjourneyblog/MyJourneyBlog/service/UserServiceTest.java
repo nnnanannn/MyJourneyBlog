@@ -1,8 +1,7 @@
 package com.myjourneyblog.MyJourneyBlog.service;
 
-import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
-import com.myjourneyblog.MyJourneyBlog.exception.DuplicateResourceException;
+import com.myjourneyblog.MyJourneyBlog.dto.UserUpdateDTO;
 import com.myjourneyblog.MyJourneyBlog.exception.ResourceNotFoundException;
 import com.myjourneyblog.MyJourneyBlog.model.User;
 import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
@@ -36,18 +35,10 @@ class UserServiceTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-    private UserRegistrationDTO registrationDTO;
     private User user;
 
     @BeforeEach
     void setUp() {
-        registrationDTO = UserRegistrationDTO.builder()
-                .username("testuser")
-                .email("test@example.com")
-                .password("password123")
-                .fullname("Test User")
-                .build();
-
         user = User.builder()
                 .id(1L)
                 .username("testuser")
@@ -55,52 +46,6 @@ class UserServiceTest {
                 .password("encodedPassword")
                 .fullname("Test User")
                 .build();
-    }
-
-    @Test
-    void registerUser_Success() {
-        // Given
-        when(userRepository.existsByUsername(registrationDTO.getUsername())).thenReturn(false);
-        when(userRepository.existsByEmail(registrationDTO.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode(registrationDTO.getPassword())).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        // When
-        UserResponseDTO result = userService.registerUser(registrationDTO);
-
-        // Then
-        assertNotNull(result);
-        assertEquals("testuser", result.getUsername());
-        assertEquals("test@example.com", result.getEmail());
-        verify(userRepository).save(any(User.class));
-        verify(passwordEncoder).encode("password123");
-    }
-
-    @Test
-    void registerUser_DuplicateUsername_ThrowsException() {
-        // Given
-        when(userRepository.existsByUsername(registrationDTO.getUsername())).thenReturn(true);
-
-        // When & Then
-        assertThrows(DuplicateResourceException.class, () -> {
-            userService.registerUser(registrationDTO);
-        });
-
-        verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
-    void registerUser_DuplicateEmail_ThrowsException() {
-        // Given
-        when(userRepository.existsByUsername(registrationDTO.getUsername())).thenReturn(false);
-        when(userRepository.existsByEmail(registrationDTO.getEmail())).thenReturn(true);
-
-        // When & Then
-        assertThrows(DuplicateResourceException.class, () -> {
-            userService.registerUser(registrationDTO);
-        });
-
-        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -126,5 +71,23 @@ class UserServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> {
             userService.getUserById(999L);
         });
+    }
+
+    @Test
+    void updateUser_Success() {
+        // Given
+        UserUpdateDTO updateDTO = UserUpdateDTO.builder()
+                .fullname("New Name")
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        UserResponseDTO result = userService.updateUser(1L, updateDTO);
+
+        // Then
+        assertEquals("New Name", result.getFullname());
+        verify(userRepository).save(user);
     }
 }

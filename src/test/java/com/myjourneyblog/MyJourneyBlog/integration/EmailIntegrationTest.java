@@ -6,7 +6,7 @@ import com.myjourneyblog.MyJourneyBlog.service.EmailService;
 import com.myjourneyblog.MyJourneyBlog.service.LearningPostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.times;
  */
 public class EmailIntegrationTest extends IntegrationTestBase {
 
-    @SpyBean
+    @MockitoSpyBean
     private EmailService emailService;
 
     @Autowired
@@ -41,8 +41,8 @@ public class EmailIntegrationTest extends IntegrationTestBase {
 
         LearningPostDTO postRequest = LearningPostDTO.builder()
                 .title("Test Post")
-                .content("Test content")
-                .title("Java")
+                .content("Test content must be long enough")
+                .category("Java")
                 .createdAt(LocalDateTime.now())
                 .build();
 

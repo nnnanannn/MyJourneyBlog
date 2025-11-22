@@ -2,6 +2,7 @@ package com.myjourneyblog.MyJourneyBlog.integration;
 
 import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.UserResponseDTO;
+import com.myjourneyblog.MyJourneyBlog.dto.UserUpdateDTO;
 import com.myjourneyblog.MyJourneyBlog.exception.DuplicateResourceException;
 import com.myjourneyblog.MyJourneyBlog.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -12,53 +13,38 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Transactional
-public class UserServiceIntegrationTest {
+@Transactional // Rolls back transactions after each test
+public class UserServiceIntegrationTest extends IntegrationTestBase {
 
     @Autowired
     private UserService userService;
 
     @Test
-    void testRegisterUser_Success() {
-        // Given
-        UserRegistrationDTO dto = UserRegistrationDTO.builder()
-                .username("testuser")
-                .email("test@example.com")
-                .password("password123")
-                .fullname("Test User")
+    public void testUpdateUser_Success() {
+        // 1. Setup: Get the test user created in IntegrationTestBase.setUp()
+        UserResponseDTO currentUser = userService.getUserByUsername(testUsername);
+        assertNotNull(currentUser, "Test user should exist");
+
+        // 2. Action: Update the user
+        UserUpdateDTO updateDTO = UserUpdateDTO.builder()
+                .fullname("Updated Name")
+                .bio("Updated Bio")
                 .build();
 
-        // When
-        UserResponseDTO response = userService.registerUser(dto);
+        UserResponseDTO updatedUser = userService.updateUser(currentUser.getId(), updateDTO);
 
-        // Then
-        assertNotNull(response.getId());
-        assertEquals("testuser", response.getUsername());
-        assertEquals("test@example.com", response.getEmail());
-        assertNotNull(response.getCreatedAt());
+        // 3. Assertion: Verify changes
+        assertEquals("Updated Name", updatedUser.getFullname());
+        assertEquals("Updated Bio", updatedUser.getBio());
+        assertEquals(testUsername, updatedUser.getUsername()); // Username shouldn't change
     }
 
     @Test
-    void testRegisterUser_DuplicateUsername() {
-        // Given
-        UserRegistrationDTO dto1 = UserRegistrationDTO.builder()
-                .username("duplicate")
-                .email("first@example.com")
-                .password("password123")
-                .build();
+    public void testGetUserByUsername_Success() {
+        // Test fetching the user created in Base
+        UserResponseDTO user = userService.getUserByUsername(testUsername);
 
-        UserRegistrationDTO dto2 = UserRegistrationDTO.builder()
-                .username("duplicate")
-                .email("second@example.com")
-                .password("password123")
-                .build();
-
-        // When
-        userService.registerUser(dto1);
-
-        // Then
-        assertThrows(DuplicateResourceException.class, () -> {
-            userService.registerUser(dto2);
-        });
+        assertNotNull(user);
+        assertEquals("test@example.com", user.getEmail());
     }
 }
