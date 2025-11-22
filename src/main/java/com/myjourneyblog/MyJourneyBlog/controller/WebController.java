@@ -113,6 +113,31 @@ public class WebController {
         return "learning-by-date";
     }
 
+    /**
+     * Project Updates by Date Page
+     */
+    @GetMapping("/projects/by-date")
+    public String projectsByDate(Model model) {
+
+        // 1. Get all project updates
+        List<ProjectUpdateDTO> allProjectUpdates = projectUpdateService.getAllUpdates();
+
+        // 2. Group project updates by Date
+        Map<LocalDate, List<ProjectUpdateDTO>> updatesByDate = allProjectUpdates.stream()
+                .filter(update -> update.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(
+                        update -> update.getCreatedAt().toLocalDate(),
+                        () -> new TreeMap<LocalDate, List<ProjectUpdateDTO>>(Comparator.reverseOrder()),
+                        Collectors.toList()
+                ));
+
+        // 3. Add to model with the name expected by projects-by-date.html
+        model.addAttribute("updatesByDate", updatesByDate);
+        model.addAttribute("activePage", "projects");
+
+        return "projects-by-date"; // Returns templates/projects-by-date.html
+    }
+
     @GetMapping("/test")
     String index(Principal principal) {
         return principal != null ? "homeSignedIn" : "homeNotSignedIn";
