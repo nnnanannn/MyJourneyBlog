@@ -14,7 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Controller
@@ -39,14 +43,16 @@ public class WebController {
         // Get recent learning posts (latest 5, sorted by creation date)
         List<LearningPostDTO> recentPosts = learningPostService.getAllPosts()
                 .stream()
-                //.sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .filter(post -> post.getCreatedAt() != null) // FIX: Filter out null dates to prevent crash
+                .sorted(Comparator.comparing(LearningPostDTO::getCreatedAt).reversed())
                 .limit(5)
                 .collect(Collectors.toList());
 
         // Get recent project updates (latest 5, sorted by creation date)
         List<ProjectUpdateDTO> recentUpdates = projectUpdateService.getAllUpdates()
                 .stream()
-                //.sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .filter(update -> update.getCreatedAt() != null) // FIX: Filter out null dates to prevent crash
+                .sorted(Comparator.comparing(ProjectUpdateDTO::getCreatedAt).reversed())
                 .limit(5)
                 .collect(Collectors.toList());
 
@@ -54,10 +60,6 @@ public class WebController {
         model.addAttribute("recentPosts", recentPosts);
         model.addAttribute("recentUpdates", recentUpdates);
         model.addAttribute("activePage", "home");
-
-        //model.addAttribute("recentPosts", learningPostService.getAllPosts());
-        //model.addAttribute("recentUpdates", projectUpdateService.getAllUpdates());
-
 
         return "index"; // Returns templates/index.html
     }
@@ -90,14 +92,22 @@ public class WebController {
 
     @GetMapping("/learning/by-date")
     public String learningByDate(Model model) {
-        List<LearningPostDTO> recentPosts = learningPostService.getAllPosts()
-                .stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .limit(5)
-                .collect(Collectors.toList());
 
-        // Add data to model for Thymeleaf to use
-        model.addAttribute("recentPosts", recentPosts);
+        // 1. Get all posts
+        List<LearningPostDTO> allPosts = learningPostService.getAllPosts();
+
+        // 2. Group posts by Date (using CreatedAt as LocalDate)
+        // Use TreeMap with reverse order to show newest dates first
+        Map<LocalDate, List<LearningPostDTO>> postsByDate = allPosts.stream()
+                .filter(post -> post.getCreatedAt() != null) // FIX: Filter here as well for safety
+                .collect(Collectors.groupingBy(
+                        post -> post.getCreatedAt().toLocalDate(),
+                        () -> new TreeMap<LocalDate, List<LearningPostDTO>>(Comparator.reverseOrder()),
+                        Collectors.toList()
+                ));
+
+        // 3. Add to model with the name expected by the Thymeleaf template
+        model.addAttribute("postsByDate", postsByDate);
         model.addAttribute("activePage", "by-date");
 
         return "learning-by-date";

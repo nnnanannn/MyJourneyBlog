@@ -60,6 +60,17 @@
             </div>
 
             <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Post Image (Optional)</label>
+                <input type="file" id="postImage" accept="image/*"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px;">
+                <small style="color: var(--beige-600); font-size: 0.875rem;">Max size: 10MB</small>
+
+                <div id="imagePreview" style="display: none; margin-top: 1rem;">
+                    <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 6px; border: 2px solid var(--beige-300);">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
                 <label style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="checkbox" id="published" checked>
                     <span>Publish immediately</span>
@@ -74,18 +85,6 @@
             </div>
         </form>
     </div>
-
-    <div style="margin-bottom: 1.5rem;">
-        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Post Image (Optional)</label>
-        <input type="file" id="postImage" accept="image/*"
-               style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px;">
-        <small style="color: var(--beige-600); font-size: 0.875rem;">Max size: 10MB</small>
-
-        <div id="imagePreview" style="display: none; margin-top: 1rem;">
-            <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 6px; border: 2px solid var(--beige-300);">
-        </div>
-    </div>
-
 </div>
 
 <th:block layout:fragment="extra-js">
@@ -117,6 +116,20 @@
             placeholder: 'Write about what you learned today...'
         });
 
+        // Image preview logic
+        document.getElementById('postImage').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Unified Form Submission
         document.getElementById('createPostForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -129,15 +142,46 @@
                 return;
             }
 
+            // 1. Handle Image Upload (if exists)
+            let imageUrl = null;
+            const imageFile = document.getElementById('postImage').files[0];
+
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('file', imageFile);
+
+                try {
+                    const imgResponse = await fetch('/api/files/upload/post-image', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: formData
+                    });
+
+                    if (imgResponse.ok) {
+                        const imgData = await imgResponse.json();
+                        imageUrl = imgData.fileUrl;
+                    } else {
+                        console.error('Image upload failed');
+                    }
+                } catch (error) {
+                    console.error('Image upload error:', error);
+                }
+            }
+
+            // 2. Create Post Data
             const postData = {
                 title: document.getElementById('title').value,
-                topic: document.getElementById('topic').value,
+                category: document.getElementById('topic').value, // 'topic' maps to 'category'
                 content: content,
                 summary: document.getElementById('summary').value,
                 learningDate: document.getElementById('learningDate').value,
+                imageUrl: imageUrl,
                 published: document.getElementById('published').checked
             };
 
+            // 3. Send Post Request
             try {
                 const response = await fetch('/api/posts', {
                     method: 'POST',
@@ -162,95 +206,6 @@
                 errorDiv.style.display = 'block';
             }
         });
-
-        // Add image preview
-document.getElementById('postImage').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('previewImg').src = e.target.result;
-            document.getElementById('imagePreview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-// Update form submission to include image
-document.getElementById('createPostForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const content = quill.root.innerHTML;
-    const errorDiv = document.getElementById('errorMessage');
-
-    if (quill.getText().trim().length === 0) {
-        errorDiv.textContent = 'Content cannot be empty';
-        errorDiv.style.display = 'block';
-        return;
-    }
-
-    // Upload image first if present
-    let imageUrl = null;
-    const imageFile = document.getElementById('postImage').files[0];
-
-    if (imageFile) {
-        const formData = new FormData();
-        formData.append('file', imageFile);
-
-        try {
-            const imgResponse = await fetch('/api/files/upload/post-image', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                body: formData
-            });
-
-            if (imgResponse.ok) {
-                const imgData = await imgResponse.json();
-                imageUrl = imgData.fileUrl;
-            }
-        } catch (error) {
-            console.error('Image upload failed:', error);
-        }
-    }
-
-    // Create post with image URL
-    const postData = {
-        title: document.getElementById('title').value,
-        topic: document.getElementById('topic').value,
-        content: content,
-        summary: document.getElementById('summary').value,
-        learningDate: document.getElementById('learningDate').value,
-        imageUrl: imageUrl,  // Add this
-        published: document.getElementById('published').checked
-    };
-
-    try {
-        const response = await fetch('/api/posts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify(postData)
-        });
-
-        if (response.ok) {
-            const post = await response.json();
-            alert('Post created successfully!');
-            window.location.href = '/learning/post/' + post.id;
-        } else {
-            const error = await response.text();
-            errorDiv.textContent = error || 'Failed to create post';
-            errorDiv.style.display = 'block';
-        }
-    } catch (error) {
-        errorDiv.textContent = 'An error occurred. Please try again.';
-        errorDiv.style.display = 'block';
-    }
-});
-
     </script>
 </th:block>
 </body>

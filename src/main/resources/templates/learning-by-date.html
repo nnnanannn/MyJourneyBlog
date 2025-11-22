@@ -1,11 +1,9 @@
-<!-- learning-by-date.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
 <head>
-<!--    <link rel="stylesheet" th:href="@{/css/style.css}">-->
-    <title>Learning by Date - Developer Learning Journey</title>
+<title>Learning by Date - Developer Learning Journey</title>
 </head>
 <body>
 <div layout:fragment="content">
@@ -30,16 +28,9 @@
                         <h3 class="card-title" th:text="${post.title}">Post Title</h3>
                     </a>
                     <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
-                          th:text="${post.topic}">Topic</span>
+                          th:text="${post.category}">Category</span>
                 </div>
-                <div class="card-meta">
-                    <span th:text="${post.viewCount} + ' views'">0 views</span>
-                </div>
-                <div class="card-content">
-                    <p th:text="${post.summary != null ? post.summary : #strings.abbreviate(post.content, 200)}">
-                        Summary...
-                    </p>
-                </div>
+                
                 <a th:href="@{/learning/post/{id}(id=${post.id})}"
                    style="color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 1rem; display: inline-block;">
                     Read more →
