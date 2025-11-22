@@ -1,0 +1,60 @@
+<!-- projects-by-date.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Projects by Date - Developer Learning Journey</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Project Updates by Date</h1>
+        <p>Track your project progress chronologically</p>
+    </div>
+
+    <div th:if="${updatesByDate != null and !updatesByDate.isEmpty()}">
+        <div th:each="entry : ${updatesByDate}" style="margin-bottom: 3rem;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--beige-300);">
+                <span th:text="${#temporals.format(entry.key, 'EEEE, MMMM dd, yyyy')}">Date</span>
+                <span style="font-size: 1rem; font-weight: normal; color: var(--beige-600); margin-left: 1rem;"
+                      th:text="${entry.value.size()} + ' update' + (${entry.value.size() > 1} ? 's' : '')">
+                    </span>
+            </h2>
+
+            <div th:each="update : ${entry.value}" class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                    <a th:href="@{/projects/update/{id}(id=${update.id})}"
+                       style="text-decoration: none; color: var(--beige-900);">
+                        <h3 class="card-title" th:text="${update.title}">Update Title</h3>
+                    </a>
+                    <span style="background-color: var(--accent); color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
+                          th:text="${update.projectName}">Project</span>
+                </div>
+                <div class="card-meta">
+                    <span th:text="${update.viewCount} + ' views'">0 views</span>
+                    <span th:if="${update.fromGithubApi}" style="margin-left: 0.5rem; color: var(--accent);">
+                            • GitHub Synced
+                        </span>
+                </div>
+                <div class="card-content">
+                    <p th:text="${update.summary != null ? update.summary : #strings.abbreviate(update.content, 200)}">
+                        Summary...
+                    </p>
+                </div>
+                <a th:href="@{/projects/update/{id}(id=${update.id})}"
+                   style="color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 1rem; display: inline-block;">
+                    Read more →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${updatesByDate == null or updatesByDate.isEmpty()}" class="card">
+        <p style="color: var(--beige-600); text-align: center;">
+            No project updates yet. <a href="/create-update" style="color: var(--accent);">Create your first update!</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>

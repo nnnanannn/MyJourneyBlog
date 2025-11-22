@@ -49,6 +49,8 @@
             height: 100vh;
             overflow-y: auto;
             padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-header {
@@ -66,6 +68,25 @@
         .sidebar-header p {
             font-size: 0.875rem;
             color: var(--beige-600);
+        }
+
+        /* User Profile Section in Sidebar */
+        .sidebar-user-profile {
+            padding: 0 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none; /* Hidden by default */
+        }
+
+        .sidebar-user-greeting {
+            font-size: 0.875rem;
+            color: var(--beige-600);
+        }
+
+        .sidebar-username {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.1rem;
+            word-break: break-all;
         }
 
         .nav-section {
@@ -141,6 +162,7 @@
             transition: background-color 0.2s;
             border: none;
             cursor: pointer;
+            text-align: center;
         }
 
         .btn:hover {
@@ -150,6 +172,10 @@
         .btn-secondary {
             background-color: var(--beige-300);
             color: var(--beige-900);
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 1.1rem;
         }
 
         .btn-secondary:hover {
@@ -211,6 +237,10 @@
             font-size: 0.875rem;
             color: var(--beige-700);
         }
+
+        #guest-nav, #user-nav {
+            display: none; /* JS will toggle these */
+        }
     </style>
 
     <th:block layout:fragment="extra-css"></th:block>
@@ -224,36 +254,37 @@
             <p>Learning Log & Projects</p>
         </div>
 
+        <div id="sidebar-user-profile" class="sidebar-user-profile">
+            <div class="sidebar-user-greeting">Signed in as:</div>
+            <div id="sidebar-username" class="sidebar-username">User</div>
+        </div>
+
         <nav>
             <div class="nav-section">
                 <div class="nav-section-title">Main</div>
                 <a href="/" class="nav-link">Home</a>
-<!--                <a href="/" class="nav-link" th:classappend="${#request.requestURI == '/' ? 'active' : ''}">Home</a>-->
-<!--                <a th:href="@{/home}"th:classappend="${activePage == 'home' ? 'active' : ''}">-->
-<!--                    <span>Home</span>-->
-<!--                </a>-->
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">Learning Journey</div>
                 <a href="/learning/by-date" class="nav-link">By Date</a>
-
-<!--                <a href="/learning/by-date" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/learning/by-date') ? 'active' : ''}">By Date</a>-->
-<!--                <a href="/learning/by-topic" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/learning/by-topic') ? 'active' : ''}">By Topic</a>-->
             </div>
 
-<!--            <div class="nav-section">-->
-<!--                <div class="nav-section-title">Projects</div>-->
-<!--                <a href="/projects/by-date" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/projects/by-date') ? 'active' : ''}">By Date</a>-->
-<!--                <a href="/projects/by-project" class="nav-link" th:classappend="${#strings.contains(#request.requestURI, '/projects/by-project') ? 'active' : ''}">By Project</a>-->
-<!--            </div>-->
+            <div class="nav-section">
+                <div class="nav-section-title">Projects</div>
+                <a href="/projects/by-date" class="nav-link">By Date</a>
+            </div>
         </nav>
 
         <div class="auth-section">
-            <div class="auth-buttons">
-                <a href="/dashboard" class="btn">Dashboard</a>
-                <a href="/login" class="btn-secondary btn">Login</a>
+            <div id="guest-nav" class="auth-buttons">
+                <a href="/login" class="btn">Login</a>
                 <a href="/register" class="btn-secondary btn">Register</a>
+            </div>
+
+            <div id="user-nav" class="auth-buttons">
+                <a href="/dashboard" class="btn">Dashboard</a>
+                <button onclick="logout()" class="btn-secondary btn" style="width: 100%">Logout</button>
             </div>
         </div>
     </aside>
@@ -261,9 +292,44 @@
     <!-- Main Content -->
     <div class="main-content">
         <div layout:fragment="content"></div>
-<!--        <th:block layout:fragment="content"></th:block>-->
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+        
+        const guestNav = document.getElementById('guest-nav');
+        const userNav = document.getElementById('user-nav');
+        const userProfile = document.getElementById('sidebar-user-profile');
+        const usernameDisplay = document.getElementById('sidebar-username');
+
+        if (token && username) {
+            // User is logged in
+            guestNav.style.display = 'none';
+            userNav.style.display = 'flex';
+            
+            // Show username above MAIN
+            usernameDisplay.textContent = username;
+            userProfile.style.display = 'block';
+        } else {
+            // User is guest
+            guestNav.style.display = 'flex';
+            userNav.style.display = 'none';
+            userProfile.style.display = 'none';
+        }
+    });
+
+    function logout() {
+        // Clear storage
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        
+        // Redirect to home
+        window.location.href = '/';
+    }
+</script>
 
 <th:block layout:fragment="extra-js"></th:block>
 </body>
