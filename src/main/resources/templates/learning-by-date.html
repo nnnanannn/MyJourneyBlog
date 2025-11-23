@@ -9,7 +9,10 @@
 <div layout:fragment="content">
     <div class="page-header fade-in">
         <h1>📅 My Learning Journey</h1>
-        <p>Browse your learning progress chronologically</p>
+        <p>Learning progress chronologically</p>
+        <a href="/create-post" class=".create-post-link" title="CreatePost">
+            <span style="font-size: 1.2rem;">✍️</span> CreatePost
+        </a>
     </div>
 
     <div th:if="${postsByDate == null or postsByDate.isEmpty()}" class="card empty-state fade-in" style="text-align: center; padding: 3rem;">
