@@ -3,47 +3,88 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
 <head>
-<title>Learning by Date - Developer Learning Journey</title>
+    <title>Learning by Date - Developer Learning Journey</title>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="page-header">
-        <h1>Learning Journey by Date</h1>
+    <div class="page-header fade-in">
+        <h1>📅 My Learning Journey</h1>
         <p>Browse your learning progress chronologically</p>
     </div>
 
+    <div th:if="${postsByDate == null or postsByDate.isEmpty()}" class="card empty-state fade-in" style="text-align: center; padding: 3rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+        <h2>No Posts Yet</h2>
+        <p style="color: var(--beige-600); margin-bottom: 1.5rem;">Start documenting your learning journey today!</p>
+        <a href="/create-post" class="btn">Create Your First Post</a>
+    </div>
+
     <div th:if="${postsByDate != null and !postsByDate.isEmpty()}">
+        
         <div th:each="entry : ${postsByDate}" style="margin-bottom: 3rem;">
-            <h2 style="font-size: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--beige-300);">
+            
+            <h2 class="fade-in" style="font-size: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--beige-300); display: flex; align-items: baseline;">
                 <span th:text="${#temporals.format(entry.key, 'EEEE, MMMM dd, yyyy')}">Date</span>
                 <span style="font-size: 1rem; font-weight: normal; color: var(--beige-600); margin-left: 1rem;"
                       th:text="${entry.value.size()} + ' post' + (${entry.value.size() > 1} ? 's' : '')">
-                    </span>
+                </span>
             </h2>
 
-            <div th:each="post : ${entry.value}" class="card">
+            <div th:each="post : ${entry.value}" class="card hover-lift fade-in" style="margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
                     <a th:href="@{/learning/post/{id}(id=${post.id})}"
                        style="text-decoration: none; color: var(--beige-900);">
-                        <h3 class="card-title" th:text="${post.title}">Post Title</h3>
+                        <h3 class="card-title" th:text="'📅 ' + ${post.title}" style="margin: 0;">Post Title</h3>
                     </a>
                     <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
                           th:text="${post.category}">Category</span>
                 </div>
-                
+
+                <div class="card-meta" style="font-size: 0.875rem; color: var(--beige-600); margin-bottom: 1rem;">
+                    <span style="margin: 0 0.5rem;">✍️</span>
+                    <span th:text="${post.authorUsername}">Author</span>
+                </div>
+
+                <div class="card-content">
+                    <div th:text="${post.content != null ? #strings.abbreviate(post.content.replaceAll('<[^>]+>', ' '), 200) : ''}" 
+                         style="color: var(--beige-700);">
+                        Summary...
+                    </div>
+                </div>
+
                 <a th:href="@{/learning/post/{id}(id=${post.id})}"
-                   style="color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 1rem; display: inline-block;">
+                   style="color: var(--accent); text-decoration: none; font-weight: 600; margin-top: 1rem; display: inline-block;">
                     Read more →
                 </a>
             </div>
         </div>
-    </div>
 
-    <div th:if="${postsByDate == null or postsByDate.isEmpty()}" class="card">
-        <p style="color: var(--beige-600); text-align: center;">
-            No learning posts yet. <a href="/create-post" style="color: var(--accent);">Create your first post!</a>
-        </p>
+        <div class="pagination fade-in" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--beige-300);" 
+             th:if="${totalPages > 1}">
+            
+            <a th:href="@{/learning/by-date(page=${currentPage - 1})}" 
+               th:if="${currentPage > 0}"
+               class="btn btn-secondary">
+               ← Previous
+            </a>
+            <span th:unless="${currentPage > 0}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">← Previous</span>
+
+            <span style="font-weight: 500; color: var(--beige-700);">
+                Page <span th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">10</span>
+            </span>
+
+            <a th:href="@{/learning/by-date(page=${currentPage + 1})}" 
+               th:if="${currentPage < totalPages - 1}"
+               class="btn btn-secondary">
+               Next →
+            </a>
+            <span th:unless="${currentPage < totalPages - 1}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">Next →</span>
+        </div>
     </div>
 </div>
+
+<th:block layout:fragment="extra-js">
+</th:block>
+
 </body>
 </html>
