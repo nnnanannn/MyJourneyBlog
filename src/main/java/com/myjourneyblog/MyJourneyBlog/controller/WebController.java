@@ -8,10 +8,12 @@ import com.myjourneyblog.MyJourneyBlog.service.LearningPostService;
 import com.myjourneyblog.MyJourneyBlog.service.ProjectUpdateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.time.LocalDate;
@@ -90,16 +92,19 @@ public class WebController {
         return "post-detail";
     }
 
+    /**
+     * Learning Posts by Date (With Pagination)
+     */
     @GetMapping("/learning/by-date")
-    public String learningByDate(Model model) {
+    public String learningByDate(@RequestParam(defaultValue = "0") int page, Model model) {
+        int pageSize = 5; // Number of posts per page
 
-        // 1. Get all posts
-        List<LearningPostDTO> allPosts = learningPostService.getAllPosts();
+        // 1. Get a PAGE of posts (sorted by newest first)
+        Page<LearningPostDTO> postPage = learningPostService.getAllPosts(page, pageSize, "createdAt", "DESC");
 
-        // 2. Group posts by Date (using CreatedAt as LocalDate)
-        // Use TreeMap with reverse order to show newest dates first
-        Map<LocalDate, List<LearningPostDTO>> postsByDate = allPosts.stream()
-                .filter(post -> post.getCreatedAt() != null) // FIX: Filter here as well for safety
+        // 2. Group THIS PAGE's posts by Date
+        Map<LocalDate, List<LearningPostDTO>> postsByDate = postPage.getContent().stream()
+                .filter(post -> post.getCreatedAt() != null)
                 .collect(Collectors.groupingBy(
                         post -> post.getCreatedAt().toLocalDate(),
                         () -> new TreeMap<LocalDate, List<LearningPostDTO>>(Comparator.reverseOrder()),
@@ -110,11 +115,15 @@ public class WebController {
         model.addAttribute("postsByDate", postsByDate);
         model.addAttribute("activePage", "by-date");
 
+        // 4. Add pagination info
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", postPage.getTotalPages());
+
         return "learning-by-date";
     }
 
     /**
-     * Project Updates by Date Page
+     * Project Updates by Date Page (With Pagination)
      */
     @GetMapping("/projects/by-date")
     public String projectsByDate(Model model) {

@@ -5,52 +5,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} ?: 'My Learning Journey'">My Learning Journey</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
     <style>
-        :root {
-            --beige-50: #faf8f5;
-            --beige-100: #f5f1e8;
-            --beige-200: #e8ddc8;
-            --beige-300: #d4c5a3;
-            --beige-400: #c0ad85;
-            --beige-500: #a89268;
-            --beige-600: #8b7756;
-            --beige-700: #6d5d45;
-            --beige-800: #4f4332;
-            --beige-900: #362d22;
-            --accent: #c07855;
-            --accent-hover: #a86749;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--beige-50);
-            color: var(--beige-900);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .container {
+        /* Using a unique name to avoid conflicts with .container in style.css */
+        .app-wrapper {
             display: flex;
             min-height: 100vh;
+            width: 100%;
         }
 
         /* Sidebar */
         .sidebar {
             width: 250px;
             background-color: var(--beige-100);
-            border-right: 1px solid var(--beige-300);
+            border-right: 1px solid var(--border);
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             padding: 2rem 0;
             display: flex;
             flex-direction: column;
+            z-index: 100; /* Ensure it stays on top */
         }
 
         .sidebar-header {
@@ -74,7 +51,7 @@
         .sidebar-user-profile {
             padding: 0 1.5rem;
             margin-bottom: 1.5rem;
-            display: none; /* Hidden by default */
+            display: none;
         }
 
         .sidebar-user-greeting {
@@ -125,12 +102,12 @@
             font-weight: 500;
         }
 
-        /* Main Content */
+        /* Main Content Area */
         .main-content {
-            margin-left: 300px;
+            margin-left: 250px; /* Matches sidebar width */
             flex: 1;
             padding: 2rem 3rem;
-            max-width: 1200px;
+            width: calc(100% - 250px); /* Ensure it takes remaining width */
         }
 
         .page-header {
@@ -150,70 +127,7 @@
             font-size: 1.125rem;
         }
 
-        /* Buttons */
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: var(--accent);
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: background-color 0.2s;
-            border: none;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .btn:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--beige-300);
-            color: var(--beige-900);
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 800;
-            font-size: 1.1rem;
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--beige-400);
-        }
-
-        /* Cards */
-        .card {
-            background-color: white;
-            border: 1px solid var(--beige-300);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            transition: box-shadow 0.2s;
-        }
-
-        .card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            color: var(--beige-900);
-            margin-bottom: 0.75rem;
-        }
-
-        .card-meta {
-            font-size: 0.875rem;
-            color: var(--beige-600);
-            margin-bottom: 1rem;
-        }
-
-        .card-content {
-            color: var(--beige-700);
-            line-height: 1.7;
-        }
-
-        /* Auth buttons in sidebar */
+        /* Auth buttons */
         .auth-section {
             padding: 1.5rem;
             border-top: 1px solid var(--beige-300);
@@ -226,28 +140,15 @@
             flex-direction: column;
         }
 
-        .user-info {
-            padding: 1rem;
-            background-color: var(--beige-200);
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
-
-        .user-info p {
-            font-size: 0.875rem;
-            color: var(--beige-700);
-        }
-
         #guest-nav, #user-nav {
-            display: none; /* JS will toggle these */
+            display: none;
         }
     </style>
 
     <th:block layout:fragment="extra-css"></th:block>
 </head>
 <body>
-<div class="container">
-    <!-- Sidebar -->
+<div class="app-wrapper">
     <aside class="sidebar">
         <div class="sidebar-header">
             <h1>My Journey</h1>
@@ -279,17 +180,16 @@
         <div class="auth-section">
             <div id="guest-nav" class="auth-buttons">
                 <a href="/login" class="btn">Login</a>
-                <a href="/register" class="btn-secondary btn">Register</a>
+                <a href="/register" class="btn btn-secondary">Register</a>
             </div>
 
             <div id="user-nav" class="auth-buttons">
                 <a href="/dashboard" class="btn">Dashboard</a>
-                <button onclick="logout()" class="btn-secondary btn" style="width: 100%">Logout</button>
+                <button onclick="logout()" class="btn btn-secondary" style="width: 100%">Logout</button>
             </div>
         </div>
     </aside>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div layout:fragment="content"></div>
     </div>
@@ -299,34 +199,28 @@
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('token');
         const username = localStorage.getItem('username');
-        
+
         const guestNav = document.getElementById('guest-nav');
         const userNav = document.getElementById('user-nav');
         const userProfile = document.getElementById('sidebar-user-profile');
         const usernameDisplay = document.getElementById('sidebar-username');
 
         if (token && username) {
-            // User is logged in
-            guestNav.style.display = 'none';
-            userNav.style.display = 'flex';
-            
-            // Show username above MAIN
-            usernameDisplay.textContent = username;
-            userProfile.style.display = 'block';
+            if(guestNav) guestNav.style.display = 'none';
+            if(userNav) userNav.style.display = 'flex';
+
+            if(usernameDisplay) usernameDisplay.textContent = username;
+            if(userProfile) userProfile.style.display = 'block';
         } else {
-            // User is guest
-            guestNav.style.display = 'flex';
-            userNav.style.display = 'none';
-            userProfile.style.display = 'none';
+            if(guestNav) guestNav.style.display = 'flex';
+            if(userNav) userNav.style.display = 'none';
+            if(userProfile) userProfile.style.display = 'none';
         }
     });
 
     function logout() {
-        // Clear storage
         localStorage.removeItem('token');
         localStorage.removeItem('username');
-        
-        // Redirect to home
         window.location.href = '/';
     }
 </script>
