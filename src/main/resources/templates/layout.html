@@ -8,7 +8,7 @@
 
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
-    <style>
+    <!--<style>
         /* Using a unique name to avoid conflicts with .container in style.css */
         .app-wrapper {
             display: flex;
@@ -143,57 +143,52 @@
         #guest-nav, #user-nav {
             display: none;
         }
-    </style>
+    </style>-->
 
     <th:block layout:fragment="extra-css"></th:block>
 </head>
 <body>
-<div class="app-wrapper">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h1>My Journey</h1>
-            <p>Learning Log & Projects</p>
-        </div>
+<nav class="navbar">
+    <div class="navbar-container">
+        <a href="/" class="nav-brand">MyJourneyBlog</a>
 
-        <div id="sidebar-user-profile" class="sidebar-user-profile">
-            <div class="sidebar-user-greeting">Signed in as:</div>
-            <div id="sidebar-username" class="sidebar-username">User</div>
-        </div>
+        <div class="nav-menu">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/learning/by-date" class="nav-link">Learning</a>
+            <a href="/projects/by-date" class="nav-link">Projects</a>
 
-        <nav>
-            <div class="nav-section">
-                <div class="nav-section-title">Main</div>
-                <a href="/" class="nav-link">Home</a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">Learning Journey</div>
-                <a href="/learning/by-date" class="nav-link">By Date</a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">Projects</div>
-                <a href="/projects/by-date" class="nav-link">By Date</a>
-            </div>
-        </nav>
-
-        <div class="auth-section">
             <div id="guest-nav" class="auth-buttons">
-                <a href="/login" class="btn">Login</a>
-                <a href="/register" class="btn btn-secondary">Register</a>
+                <a href="/login" class="nav-link">Sign in</a>
+                <a href="/register" class="btn btn-primary">Get started</a>
             </div>
 
-            <div id="user-nav" class="auth-buttons">
-                <a href="/dashboard" class="btn">Dashboard</a>
-                <button onclick="logout()" class="btn btn-secondary" style="width: 100%">Logout</button>
+            <div id="user-nav" class="auth-buttons" style="display: none;">
+                <!--<a href="/create-post" class="nav-link" title="CreatePost">
+                    <span style="font-size: 1.2rem;">✍️</span> CreatePost
+                </a>-->
+                
+                <div class="nav-user-profile">
+                    <a href="/dashboard" class="nav-user-avatar" title="Dashboard">
+                        <span id="nav-avatar-initial">U</span>
+                    </a>
+                    <span id="nav-username" style="font-weight: 500; display: none;">User</span>
+                </div>
+                
+                <button onclick="logout()" class="nav-link" style="background: none; border: none; cursor: pointer;">
+                    Sign out
+                </button>
             </div>
         </div>
-    </aside>
-
-    <div class="main-content">
-        <div layout:fragment="content"></div>
     </div>
-</div>
+</nav>
+
+<main class="main-content">
+    <div layout:fragment="content"></div>
+</main>
+
+<footer style="text-align: center; padding: 2rem; font-size: 0.875rem; color: var(--beige-600); border-top: 1px solid var(--beige-200); margin-top: auto;">
+    <p>&copy; 2025 MyJourney Blog. Documenting the process.</p>
+</footer>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -202,19 +197,24 @@
 
         const guestNav = document.getElementById('guest-nav');
         const userNav = document.getElementById('user-nav');
-        const userProfile = document.getElementById('sidebar-user-profile');
-        const usernameDisplay = document.getElementById('sidebar-username');
+        const navUsername = document.getElementById('nav-username');
+        const navAvatarInit = document.getElementById('nav-avatar-initial');
 
         if (token && username) {
+            // User is logged in
             if(guestNav) guestNav.style.display = 'none';
             if(userNav) userNav.style.display = 'flex';
-
-            if(usernameDisplay) usernameDisplay.textContent = username;
-            if(userProfile) userProfile.style.display = 'block';
+            
+            if(navUsername) {
+                navUsername.textContent = username;
+                // navUsername.style.display = 'inline'; // Uncomment if you want text name next to avatar
+            }
+            if(navAvatarInit) navAvatarInit.textContent = username.charAt(0).toUpperCase();
+            
         } else {
+            // Guest mode
             if(guestNav) guestNav.style.display = 'flex';
             if(userNav) userNav.style.display = 'none';
-            if(userProfile) userProfile.style.display = 'none';
         }
     });
 
