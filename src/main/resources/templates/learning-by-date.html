@@ -10,8 +10,12 @@
     <div class="page-header fade-in">
         <h1>📅 My Learning Journey</h1>
         <p>Learning progress chronologically</p>
-        <a href="/create-post" class=".create-post-link" title="CreatePost">
-            <span style="font-size: 1.2rem;">✍️</span> CreatePost
+        <a href="/create-post" 
+        id="create-project-btn"
+        class="create-post-link" 
+        title="CreatePost"
+        style="display: none;">
+            <span style="font-size: 1.2rem;">✍️</span> Create Learning Post
         </a>
     </div>
 
@@ -19,7 +23,10 @@
         <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
         <h2>No Posts Yet</h2>
         <p style="color: var(--beige-600); margin-bottom: 1.5rem;">Start documenting your learning journey today!</p>
-        <a href="/create-post" class="btn">Create Your First Post</a>
+        <a href="/create-post" 
+        id="create-project-empty-btn" 
+        class="btn btn-primary"
+        style="display: none;">Create Your First Post</a>
     </div>
 
     <div th:if="${postsByDate != null and !postsByDate.isEmpty()}">
@@ -87,6 +94,19 @@
 </div>
 
 <th:block layout:fragment="extra-js">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // User is logged in, show the buttons
+                const headerBtn = document.getElementById('create-project-btn');
+                const emptyBtn = document.getElementById('create-project-empty-btn');
+                
+                if (headerBtn) headerBtn.style.display = 'inline-block'; // or 'flex' depending on your css
+                if (emptyBtn) emptyBtn.style.display = 'inline-block';
+            }
+        });
+    </script>
 </th:block>
 
 </body>
