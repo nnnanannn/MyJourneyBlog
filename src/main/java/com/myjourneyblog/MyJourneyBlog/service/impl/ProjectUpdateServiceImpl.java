@@ -65,12 +65,6 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
     }
 
     @Override
-    public ProjectUpdateDTO getUpdateById(Long id) {
-        log.debug("Fetching project update by ID: {}", id);
-        return null;
-    }
-
-    @Override
     public List<ProjectUpdateDTO> getUpdatesByAuthor(Long authorId) {
         log.debug("Fetching project update by author: {}", authorId);
         return null;
@@ -113,16 +107,51 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
 
     @Override
     public Page<ProjectUpdateDTO> getAllProject(int page, int size, String sortBy, String direction) {
-        log.debug("Fetching all projects from database - page: {}, size: {}", page, size);
-
-        Sort sort = direction.equalsIgnoreCase("DESC")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-
+        // Deprecated/Legacy support if needed, or you can remove
+        Sort sort = direction.equalsIgnoreCase("DESC") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<ProjectUpdate> projectPage = projectUpdateRepository.findAllWithAuthors(pageable);
+        return projectUpdateRepository.findAllWithAuthors(pageable).map(this::toDTO);
+    }
 
-        return projectPage.map(this::toDTO);
+//    @Override
+//    public Page<ProjectUpdateDTO> getAllProject(int page, int size, String sortBy, String direction) {
+//        log.debug("Fetching all projects from database - page: {}, size: {}", page, size);
+//
+//        Sort sort = direction.equalsIgnoreCase("DESC")
+//                ? Sort.by(sortBy).descending()
+//                : Sort.by(sortBy).ascending();
+//
+//        Pageable pageable = PageRequest.of(page, size, sort);
+//        Page<ProjectUpdate> projectPage = projectUpdateRepository.findByProjectName(projectName);
+//
+//        return projectPage.map(this::toDTO);
+//    }
+
+    @Override
+    public Page<ProjectUpdateDTO> getDistinctProjects(Pageable pageable) {
+        log.debug("Fetching distinct projects (latest update per project)");
+        return projectUpdateRepository.findDistinctProjects(pageable)
+                .map(this::toDTO);
+    }
+
+    @Override
+    public Page<ProjectUpdateDTO> getProjectUpdates(String projectName, Pageable pageable) {
+        log.debug("Fetching paginated updates for project: {}", projectName);
+
+        // Use the repository method that filters by Name
+        Page<ProjectUpdate> updates = projectUpdateRepository.findByProjectName(projectName, pageable);
+
+        return updates.map(this::toDTO);
+    }
+
+    @Override
+    public ProjectUpdateDTO getUpdateById(Long id) {
+        log.debug("Fetching project update by ID: {}", id);
+
+        ProjectUpdate update = projectUpdateRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project update", id));
+
+        return toDTO(update);
     }
 
     @Transactional
@@ -141,7 +170,10 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
 
     @Override
     public List<ProjectUpdateDTO> searchUpdates(String keyword) {
-        return List.of();
+        return projectUpdateRepository.searchByTitleOrDescription(keyword)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -152,6 +184,8 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
     private ProjectUpdateDTO toDTO(ProjectUpdate projectUpdate) {
         return ProjectUpdateDTO.builder()
                 .id(projectUpdate.getId())
+                .title(projectUpdate.getTitle())
+                .description(projectUpdate.getDescription())
                 .projectName(projectUpdate.getProjectName())
                 .updateType(projectUpdate.getUpdateType())
                 .projectStatus(projectUpdate.getProjectStatus())
@@ -160,6 +194,10 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
                 .challengesFaced(projectUpdate.getChallengesFaced())
                 .lessonsLearned(projectUpdate.getLessonsLearned())
                 .nextSteps(projectUpdate.getNextSteps())
+                .createdAt(projectUpdate.getCreatedAt())
+                .updatedAt(projectUpdate.getUpdatedAt())
+                .authorId(projectUpdate.getAuthor().getId())
+                .authorUsername(projectUpdate.getAuthor().getUsername())
                 .build();
     }
 }
