@@ -2,15 +2,16 @@ package com.myjourneyblog.MyJourneyBlog.service.impl;
 
 import com.myjourneyblog.MyJourneyBlog.dto.ProjectUpdateDTO;
 import com.myjourneyblog.MyJourneyBlog.exception.ResourceNotFoundException;
-import com.myjourneyblog.MyJourneyBlog.model.ProjectStatus;
-import com.myjourneyblog.MyJourneyBlog.model.ProjectUpdate;
-import com.myjourneyblog.MyJourneyBlog.model.UpdateType;
-import com.myjourneyblog.MyJourneyBlog.model.User;
+import com.myjourneyblog.MyJourneyBlog.model.*;
 import com.myjourneyblog.MyJourneyBlog.repository.ProjectUpdateRepository;
 import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
 import com.myjourneyblog.MyJourneyBlog.service.ProjectUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,6 +104,25 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProjectUpdateDTO> getUpdatesGroupedByProject() {
+        return List.of();
+    }
+
+    @Override
+    public Page<ProjectUpdateDTO> getAllProject(int page, int size, String sortBy, String direction) {
+        log.debug("Fetching all projects from database - page: {}, size: {}", page, size);
+
+        Sort sort = direction.equalsIgnoreCase("DESC")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<ProjectUpdate> projectPage = projectUpdateRepository.findAllWithAuthors(pageable);
+
+        return projectPage.map(this::toDTO);
     }
 
     @Transactional

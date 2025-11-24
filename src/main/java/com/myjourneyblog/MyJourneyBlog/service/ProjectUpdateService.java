@@ -5,6 +5,8 @@ import com.myjourneyblog.MyJourneyBlog.dto.ProjectUpdateDTO;
 import com.myjourneyblog.MyJourneyBlog.model.ProjectStatus;
 import com.myjourneyblog.MyJourneyBlog.model.UpdateType;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -24,6 +26,10 @@ public interface ProjectUpdateService {
     List<ProjectUpdateDTO> getUpdatesByType(UpdateType type);
 
     List<ProjectUpdateDTO> getUpdatesByStatus(ProjectStatus status);
+
+    List<ProjectUpdateDTO> getUpdatesGroupedByProject();
+
+    Page<ProjectUpdateDTO> getAllProject(int page, int size, String sortBy, String direction);
 
     void deleteUpdate(Long id);
 

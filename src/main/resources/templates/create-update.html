@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Create Project Update - Developer Learning Journey</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Create Project Update</h1>
+        <p>Document your project progress</p>
+    </div>
+
+    <div class="card" style="max-width: 900px; margin: 0 auto;">
+        <form id="createUpdateForm">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Project Name *</label>
+                <input type="text" id="projectName" required
+                       placeholder="e.g., E-commerce Platform, Blog System"
+                       list="projectSuggestions"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+                <datalist id="projectSuggestions"></datalist>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Update Title *</label>
+                <input type="text" id="title" required
+                       placeholder="What did you accomplish?"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Update Date *</label>
+                <input type="date" id="updateDate" required
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Content *</label>
+                <div id="editor" style="height: 400px; background-color: white;"></div>
+                <input type="hidden" id="content">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Summary (Optional)</label>
+                <textarea id="summary" rows="3"
+                          placeholder="Brief summary of this update..."
+                          style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem; font-family: inherit;"></textarea>
+            </div>
+
+            <div style="border-top: 1px solid var(--beige-300); padding-top: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">GitHub Links (Optional)</h3>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Repository URL</label>
+                    <input type="url" id="githubRepoUrl"
+                           placeholder="https://github.com/username/repo"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Commit URL</label>
+                    <input type="url" id="githubCommitUrl"
+                           placeholder="https://github.com/username/repo/commit/abc123"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid var(--beige-300); border-radius: 6px; font-size: 1rem;">
+                </div>
+
+                <p style="font-size: 0.875rem; color: var(--beige-600); margin-top: 0.5rem;">
+                    💡 Tip: You can also automatically sync commits from the dashboard!
+                </p>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="published" checked>
+                    <span>Publish immediately</span>
+                </label>
+            </div>
+
+            <div id="errorMessage" style="display: none; padding: 0.75rem; background-color: #fee; border: 1px solid #fcc; border-radius: 6px; margin-bottom: 1rem; color: #c00;"></div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn">Create Update</button>
+                <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Set today's date as default
+        document.getElementById('updateDate').valueAsDate = new Date();
+
+        // Load existing project names for suggestions
+        async function loadProjectNames() {
+            try {
+                const response = await fetch('/api/projects/project-names');
+                if (response.ok) {
+                    const projects = await response.json();
+                    const datalist = document.getElementById('projectSuggestions');
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project;
+                        datalist.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading project names:', error);
+            }
+        }
+        loadProjectNames();
+
+        // Initialize Quill editor
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'script': 'sub'}, { 'script': 'super' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Describe what you worked on, challenges faced, solutions found...'
+        });
+
+        document.getElementById('createUpdateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const content = quill.root.innerHTML;
+            const errorDiv = document.getElementById('errorMessage');
+
+            if (quill.getText().trim().length === 0) {
+                errorDiv.textContent = 'Content cannot be empty';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const updateData = {
+                projectName: document.getElementById('projectName').value,
+                title: document.getElementById('title').value,
+                content: content,
+                summary: document.getElementById('summary').value,
+                updateDate: document.getElementById('updateDate').value,
+                githubRepoUrl: document.getElementById('githubRepoUrl').value,
+                githubCommitUrl: document.getElementById('githubCommitUrl').value,
+                published: document.getElementById('published').checked
+            };
+
+            try {
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+                    const update = await response.json();
+                    alert('Project update created successfully!');
+                    window.location.href = '/projects/update/' + update.id;
+                } else {
+                    const error = await response.text();
+                    errorDiv.textContent = error || 'Failed to create update';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

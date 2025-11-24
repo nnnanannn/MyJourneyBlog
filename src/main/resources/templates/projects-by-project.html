@@ -1,0 +1,73 @@
+<!-- projects-by-project.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Projects by Name - Developer Learning Journey</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Projects Overview</h1>
+        <p>Browse updates organized by project</p>
+    </div>
+
+    <div th:if="${projectNames != null and !projectNames.isEmpty()}" style="margin-bottom: 2rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+            <a th:each="projectName : ${projectNames}"
+               th:href="@{/projects/project/{projectName}(projectName=${projectName})}"
+               style="padding: 0.5rem 1rem; background-color: var(--accent); color: white; border-radius: 20px; text-decoration: none; font-weight: 500; transition: all 0.2s;"
+               onmouseover="this.style.backgroundColor='var(--accent-hover)'"
+               onmouseout="this.style.backgroundColor='var(--accent)'"
+               th:text="${projectName}">
+                Project Name
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${projectsByName != null and !projectsByName.isEmpty()}">
+        <div th:each="entry : ${projectsByName}" style="margin-bottom: 3rem;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--beige-300);">
+                <span th:text="${entry.key}">Project Name</span>
+                <span style="font-size: 1rem; font-weight: normal; color: var(--beige-600); margin-left: 1rem;"
+                      th:text="${entry.value.size()} + ' update' + (${entry.value.size() > 1} ? 's' : '')">
+                    </span>
+            </h2>
+
+            <div th:each="update : ${entry.value}" class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                    <a th:href="@{/projects/update/{id}(id=${update.id})}"
+                       style="text-decoration: none; color: var(--beige-900);">
+                        <h3 class="card-title" th:text="${update.title}">Update Title</h3>
+                    </a>
+                </div>
+                <div class="card-meta">
+                    <span th:text="${#temporals.format(update.updateDate, 'MMMM dd, yyyy')}">Date</span>
+                    <span style="margin: 0 0.5rem;">•</span>
+                    <span th:text="${update.viewCount} + ' views'">0 views</span>
+                    <span th:if="${update.fromGithubApi}" style="margin-left: 0.5rem; color: var(--accent);">
+                            • GitHub
+                        </span>
+                </div>
+                <div class="card-content">
+                    <p th:text="${update.summary != null ? update.summary : #strings.abbreviate(update.content, 200)}">
+                        Summary...
+                    </p>
+                </div>
+                <a th:href="@{/projects/update/{id}(id=${update.id})}"
+                   style="color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 1rem; display: inline-block;">
+                    Read more →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${projectsByName == null or projectsByName.isEmpty()}" class="card">
+        <p style="color: var(--beige-600); text-align: center;">
+            No project updates yet. <a href="/create-update" style="color: var(--accent);">Create your first update!</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>

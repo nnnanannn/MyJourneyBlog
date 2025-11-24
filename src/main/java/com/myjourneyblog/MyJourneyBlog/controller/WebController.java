@@ -86,6 +86,11 @@ public class WebController {
         return "create-post";
     }
 
+    @GetMapping("/create-update")
+    public String createUpdate() {
+        return "create-update";
+    }
+
     @GetMapping("/learning/post/{id}")
     public String viewPost(@PathVariable Long id, Model model) {
         model.addAttribute("post", learningPostService.getPostById(id));
@@ -145,6 +150,32 @@ public class WebController {
         model.addAttribute("activePage", "projects");
 
         return "projects-by-date"; // Returns templates/projects-by-date.html
+    }
+
+    @GetMapping("/projects/by-project")
+    public String projectsByName(@RequestParam(defaultValue = "0") int page, Model model) {
+        int pageSize = 5; // Number of projects per page
+
+        // 1. Get all projects by name
+        Page<ProjectUpdateDTO> projectsPage = projectUpdateService.getAllProject(page, pageSize, "createdAt", "DESC");
+
+        // 2. Group THIS PAGE's projects by Name
+        Map<LocalDate, List<ProjectUpdateDTO>> projectsByName = projectsPage.stream()
+                .filter(update -> update.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(
+                        update -> update.getCreatedAt().toLocalDate(),
+                        () -> new TreeMap<LocalDate, List<ProjectUpdateDTO>>(Comparator.reverseOrder()),
+                        Collectors.toList()
+                ));
+
+        // 3. Add to model with the name expected by the Thymeleaf template
+        model.addAttribute("projectsByName", projectsByName);
+        model.addAttribute("activePage", "by-date");
+
+        // 4. Add pagination info
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", projectsPage.getTotalPages());
+        return "projects-by-project";
     }
 
     @GetMapping("/test")
