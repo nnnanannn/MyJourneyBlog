@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${projectName} + ' - History'">Project History</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <div style="margin-bottom: 1rem;">
+            <a href="/projects" class="btn btn-secondary" style="font-size: 0.9rem;">← Back to Projects</a>
+        </div>
+        <h1 th:text="${projectName}">Project Name</h1>
+        <p>Project History & Updates</p>
+    </div>
+
+    <div th:if="${updates != null and !updates.isEmpty()}">
+        <div th:each="update : ${updates}" class="card fade-in" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <div>
+                    <a th:href="@{/projects/update/{id}(id=${update.id})}" style="text-decoration: none; color: inherit;">
+                        <h3 class="card-title" th:text="${update.title}" style="margin-bottom: 0.25rem;">Update Title</h3>
+                    </a>
+                    <span th:text="${#temporals.format(update.createdAt, 'MMMM dd, yyyy')}" style="font-size: 0.85rem; color: var(--beige-600);">Date</span>
+                </div>
+
+                <span th:text="${update.updateType}"
+                      style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem;">
+                    TYPE
+                </span>
+            </div>
+
+<!--            <div class="card-content">-->
+<!--                <p th:text="${update.summary != null ? update.summary : #strings.abbreviate(update.description.replaceAll('<[^>]+>', ' '), 200)}">-->
+<!--                    Summary...-->
+<!--                </p>-->
+<!--            </div>-->
+
+            <div style="margin-top: 1rem;">
+                <a th:href="@{/projects/update/{id}(id=${update.id})}" style="color: var(--accent); font-weight: 500;">Read full update →</a>
+            </div>
+        </div>
+
+        <div class="pagination" style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;" th:if="${totalPages > 1}">
+            <a th:href="@{'/projects/project/' + ${projectName}(page=${currentPage - 1})}"
+               th:if="${currentPage > 0}" class="btn btn-secondary">← Newer</a>
+
+            <span style="align-self: center; color: var(--beige-700);">Page [[${currentPage + 1}]] of [[${totalPages}]]</span>
+
+            <a th:href="@{'/projects/project/' + ${projectName}(page=${currentPage + 1})}"
+               th:if="${currentPage < totalPages - 1}" class="btn btn-secondary">Older →</a>
+        </div>
+    </div>
+
+    <div th:if="${updates == null or updates.isEmpty()}" class="card">
+        <p>No updates found for this project.</p>
+    </div>
+</div>
+</body>
+</html>
