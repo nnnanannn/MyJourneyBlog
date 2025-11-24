@@ -9,6 +9,9 @@ import com.myjourneyblog.MyJourneyBlog.service.ProjectUpdateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,9 +89,9 @@ public class WebController {
         return "create-post";
     }
 
-    @GetMapping("/create-update")
-    public String createUpdate() {
-        return "create-update";
+    @GetMapping("/create-project")
+    public String createProject() {
+        return "create-project";
     }
 
     @GetMapping("/learning/post/{id}")
@@ -125,6 +128,67 @@ public class WebController {
         model.addAttribute("totalPages", postPage.getTotalPages());
 
         return "learning-by-date";
+    }
+
+    /**
+     * All Projects (With Pagination)
+     */
+    @GetMapping("/projects")
+    public String projectsPage(@RequestParam(defaultValue = "0") int page, Model model) {
+        int pageSize = 6; // Grid view fits better with even numbers or multiples of 3
+
+        // Fetch DISTINCT projects (latest update for each)
+        // Sort by updatedAt DESC to show recently active projects first
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("updatedAt").descending());
+        Page<ProjectUpdateDTO> projectPage = projectUpdateService.getDistinctProjects(pageable);
+
+        model.addAttribute("projects", projectPage.getContent());
+        model.addAttribute("activePage", "projects"); // Highlights nav bar
+
+        // Pagination
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", projectPage.getTotalPages());
+
+        return "projects"; // New template
+    }
+
+    /**
+     * Project by name (With Pagination)
+     */
+    @GetMapping("/projects/project/{projectName}")
+    public String projectHistory(@PathVariable String projectName,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 Model model) {
+
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("createdAt").descending());
+
+        // We need to add this specific method to Service if not exposed,
+        // or use repository directly if Service wrapper is missing.
+        // Assuming repository.findByProjectName returns List, we might need to fix Service to support Page.
+        // For now, let's assume we fetch the list and do simple view:
+
+        List<ProjectUpdateDTO> updates = projectUpdateService.getUpdatesByProject(projectName);
+
+        model.addAttribute("projectName", projectName);
+        model.addAttribute("updates", updates);
+        model.addAttribute("activePage", "projects");
+
+        return "project-history"; // We will create/reuse a simple history template
+    }
+
+    /**
+     * View a single Project Update Details
+     */
+    @GetMapping("/projects/update/{id}")
+    public String viewProjectUpdate(@PathVariable Long id, Model model) {
+        // Fetch the update using the service
+        ProjectUpdateDTO update = projectUpdateService.getUpdateById(id);
+
+        model.addAttribute("update", update);
+        model.addAttribute("activePage", "projects");
+
+        return "update-detail";
     }
 
     /**
