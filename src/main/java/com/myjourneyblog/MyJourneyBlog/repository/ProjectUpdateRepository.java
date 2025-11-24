@@ -124,4 +124,11 @@ public interface ProjectUpdateRepository extends JpaRepository<ProjectUpdate, Lo
             "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<ProjectUpdate> searchByTitleOrDescription(@Param("keyword") String keyword, Pageable pageable);
 
+    // Fetch the LATEST update for each unique project name (Effective "Current State" of the project)
+    // Use a subquery to find the MAX(id) for each projectName
+    @Query(value = "SELECT p FROM ProjectUpdate p WHERE p.id IN " +
+            "(SELECT MAX(p2.id) FROM ProjectUpdate p2 GROUP BY p2.projectName) " +
+            "ORDER BY p.updatedAt DESC",
+            countQuery = "SELECT COUNT(DISTINCT p.projectName) FROM ProjectUpdate p")
+    Page<ProjectUpdate> findDistinctProjects(Pageable pageable);
 }
