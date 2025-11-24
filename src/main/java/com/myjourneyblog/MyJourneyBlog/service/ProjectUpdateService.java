@@ -31,6 +31,10 @@ public interface ProjectUpdateService {
 
     Page<ProjectUpdateDTO> getAllProject(int page, int size, String sortBy, String direction);
 
+    Page<ProjectUpdateDTO> getDistinctProjects(Pageable pageable);
+
+    Page<ProjectUpdateDTO> getProjectUpdates(String projectName, Pageable pageable);
+
     void deleteUpdate(Long id);
 
     List<ProjectUpdateDTO> searchUpdates(String keyword);

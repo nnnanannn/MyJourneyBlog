@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Create / Update Project - Developer Learning Journey</title>
+    <th:block layout:fragment="extra-css">
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <style>
+            /* Fix for Quill editor height */
+            .ql-container {
+                height: 300px;
+                font-family: var(--font-sans);
+                font-size: 1rem;
+            }
+            /* Ensure toolbar doesn't look weird */
+            .ql-toolbar {
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
+                background-color: #f8f9fa;
+            }
+            .ql-container {
+                border-bottom-left-radius: 6px;
+                border-bottom-right-radius: 6px;
+                background-color: white;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Create / Update Project</h1>
+        <p>Start a new project or document progress on an existing one</p>
+    </div>
+
+    <div class="card" style="max-width: 900px; margin: 0 auto;">
+        <form id="createUpdateForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Project Name *</label>
+                    <input type="text" id="projectName" required
+                           placeholder="e.g., Blog System"
+                           list="projectSuggestions"
+                           class="form-control">
+                    <datalist id="projectSuggestions"></datalist>
+                    <small style="color: var(--beige-600);">Existing name adds an update, new name starts a project.</small>
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Project Status *</label>
+                    <select id="projectStatus" class="form-control">
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="PLANNING">Planning</option>
+                        <option value="TESTING">Testing</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="ON_HOLD">On Hold</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Update Title *</label>
+                <input type="text" id="title" required
+                       placeholder="What did you accomplish? (e.g., Initial Commit, Added Auth)"
+                       class="form-control">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Technologies Used</label>
+                <input type="text" id="technologiesUsed"
+                       placeholder="Java, Spring Boot, PostgreSQL (Comma separated)"
+                       class="form-control">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Update Type</label>
+                <select id="updateType" class="form-control">
+                    <option value="FEATURE">New Feature</option>
+                    <option value="BUG_FIX">Bug Fix</option>
+                    <option value="REFACTOR">Refactoring</option>
+                    <option value="DOCUMENTATION">Documentation</option>
+                    <option value="DEPLOYMENT">Deployment</option>
+                    <option value="LEARNING">Learning</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Content *</label>
+                <div id="editor"></div>
+                <input type="hidden" id="content">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">GitHub Repository (Optional)</label>
+                <input type="url" id="githubRepoUrl"
+                       placeholder="https://github.com/username/repo"
+                       class="form-control">
+            </div>
+
+            <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary">Save Project Update</button>
+                <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/login';
+
+        // Initialize Quill with specific container
+        var quill = new Quill('#editor', {
+            theme: 'snow',
+            placeholder: 'Describe what you worked on, challenges faced, and solutions found...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Load suggestions logic (Keep existing logic)
+        fetch('/api/projects').then(res => res.json()).then(data => {
+            if(Array.isArray(data)){
+                const names = [...new Set(data.map(u => u.projectName))];
+                const datalist = document.getElementById('projectSuggestions');
+                datalist.innerHTML = ''; // Clear existing
+                names.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    datalist.appendChild(option);
+                });
+            }
+        }).catch(e => console.error("Could not load project names", e));
+
+        document.getElementById('createUpdateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorDiv = document.getElementById('errorMessage');
+
+            // Get HTML content from Quill
+            const content = quill.root.innerHTML;
+            // Get Text only to check for emptiness
+            const text = quill.getText().trim();
+
+            if (text.length === 0 && !content.includes('<img')) {
+                errorDiv.textContent = 'Content cannot be empty';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const data = {
+                projectName: document.getElementById('projectName').value,
+                projectStatus: document.getElementById('projectStatus').value,
+                title: document.getElementById('title').value,
+                description: content, // Send HTML content
+                technologiesUsed: document.getElementById('technologiesUsed').value,
+                updateType: document.getElementById('updateType').value,
+                githubRepoUrl: document.getElementById('githubRepoUrl').value
+            };
+
+            try {
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    window.location.href = '/projects';
+                } else {
+                    const errText = await response.text();
+                    errorDiv.textContent = 'Failed to create: ' + (errText || 'Unknown error');
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error occurred';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

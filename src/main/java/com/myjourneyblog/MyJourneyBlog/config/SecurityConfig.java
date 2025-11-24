@@ -59,6 +59,7 @@ public class SecurityConfig {
                                 "/dashboard",
                                 "/create-post",
                                 "/create-update",
+                                "/create-project",
                                 "/learning/by-date",
                                 "/learning/post/**",
                                 "/projects/by-date",

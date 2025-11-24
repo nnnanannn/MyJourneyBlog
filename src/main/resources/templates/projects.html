@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <!-- Main styles -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>My Projects</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header fade-in">
+        <h1>🚀 My Projects</h1>
+        <p>A portfolio of things I'm building</p>
+        
+        <a href="/create-project"
+        id="create-project-btn"
+        class="create-post-link"
+        title="Create Project"
+        style="display: none;">
+        <span style="font-size: 1.2rem;">🔨</span> Create/Update  Project
+        </a>
+    </div>
+
+    <div th:if="${projects == null or projects.isEmpty()}" class="card empty-state fade-in" style="text-align: center; padding: 3rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">👨‍💻</div>
+        <h2>No Projects Yet</h2>
+        <p style="color: var(--beige-600); margin-bottom: 1.5rem;">Start your first coding project today!</p>
+        <a href="/create-project"
+        id="create-project-empty-btn"
+        class="btn btn-primary">Add Project</a>
+    </div>
+
+    <div th:if="${projects != null and !projects.isEmpty()}"
+         style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+
+        <div th:each="project : ${projects}" class="card hover-lift fade-in" style="display: flex; flex-direction: column; height: 100%;">
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <span th:text="${project.projectStatus}"
+                      th:classappend="${'badge ' +
+                        (project.projectStatus.name() == 'COMPLETED' ? 'badge-success' :
+                        (project.projectStatus.name() == 'IN_PROGRESS' ? 'badge-warning' : 'badge-secondary'))}"
+                      style="font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 20px;">
+                    STATUS
+                </span>
+                <small style="color: var(--beige-600);" th:text="${#temporals.format(project.updatedAt, 'MMM dd, yyyy')}">Date</small>
+            </div>
+
+            <a th:href="@{/projects/project/{name}(name=${project.projectName})}"
+               style="text-decoration: none; color: inherit;">
+                <h3 class="card-title" th:text="${project.projectName}" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Project Name</h3>
+            </a>
+
+            <div class="card-content" style="flex: 1; margin-bottom: 1.5rem;">
+                <p style="font-style: italic; font-size: 0.9rem; color: var(--beige-600); margin-bottom: 0.5rem;">
+                    Latest update: <span th:text="${project.title}">Update Title</span>
+                </p>
+                <p th:text="${project.description != null ? #strings.abbreviate(project.description.replaceAll('<[^>]+>', ' '), 120) : 'No description available.'}">
+                    Description...
+                </p>
+            </div>
+
+            <div th:if="${project.technologiesUsed != null}" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <span th:each="tech : ${#strings.arraySplit(project.technologiesUsed, ',')}"
+                          style="background-color: var(--beige-100); color: var(--beige-700); font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 4px; border: 1px solid var(--beige-200);"
+                          th:text="${#strings.trim(tech)}">Tech</span>
+                </div>
+            </div>
+
+            <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--beige-200); display: flex; justify-content: space-between; align-items: center;">
+                <a th:href="@{/projects/project/{name}(name=${project.projectName})}"
+                   style="color: var(--accent); font-weight: 600; font-size: 0.9rem;">
+                    View History →
+                </a>
+
+                <a th:if="${project.githubRepoUrl != null}"
+                   th:href="${project.githubRepoUrl}" target="_blank" title="View on GitHub"
+                   style="color: var(--beige-700); font-size: 1.2rem;">
+                    📂
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="pagination fade-in"
+         style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1rem;"
+         th:if="${totalPages > 1}">
+
+        <a th:href="@{/projects(page=${currentPage - 1})}"
+           th:if="${currentPage > 0}"
+           class="btn btn-secondary">
+            ← Previous
+        </a>
+        <span th:unless="${currentPage > 0}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">← Previous</span>
+
+        <span style="font-weight: 500; color: var(--beige-700);">
+            Page <span th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">10</span>
+        </span>
+
+        <a th:href="@{/projects(page=${currentPage + 1})}"
+           th:if="${currentPage < totalPages - 1}"
+           class="btn btn-secondary">
+            Next →
+        </a>
+        <span th:unless="${currentPage < totalPages - 1}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">Next →</span>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // User is logged in, show the buttons
+                const headerBtn = document.getElementById('create-project-btn');
+                const emptyBtn = document.getElementById('create-project-empty-btn');
+                
+                if (headerBtn) headerBtn.style.display = 'inline-block'; // or 'flex' depending on your css
+                if (emptyBtn) emptyBtn.style.display = 'inline-block';
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>
