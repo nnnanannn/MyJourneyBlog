@@ -155,6 +155,9 @@ public class LearningPostServiceImpl implements LearningPostService {
         if (postDTO.getResourcesUsed() != null) {
             post.setResourcesUsed(postDTO.getResourcesUsed());
         }
+        if (postDTO.getLearningDate() != null) {
+            post.setLearningDate(postDTO.getLearningDate());
+        }
 
         LearningPost updatedPost = learningPostRepository.save(post);
         log.info("Learning post updated: {}", updatedPost.getId());
