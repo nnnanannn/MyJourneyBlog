@@ -71,6 +71,14 @@
 
         <div class="pagination fade-in" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--beige-300);" 
              th:if="${totalPages > 1}">
+
+             <a th:href="@{/learning/by-date(page=0)}" 
+               th:if="${currentPage > 0}"
+               class="btn btn-secondary"
+               title="First Page">
+               &laquo; First
+            </a>
+            <span th:unless="${currentPage > 0}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">&laquo; First</span>
             
             <a th:href="@{/learning/by-date(page=${currentPage - 1})}" 
                th:if="${currentPage > 0}"
@@ -89,6 +97,14 @@
                Next →
             </a>
             <span th:unless="${currentPage < totalPages - 1}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">Next →</span>
+
+            <a th:href="@{/learning/by-date(page=${totalPages - 1})}" 
+               th:if="${currentPage < totalPages - 1}"
+               class="btn btn-secondary"
+               title="Last Page">
+               Last &raquo;
+            </a>
+            <span th:unless="${currentPage < totalPages - 1}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">Last &raquo;</span>
         </div>
     </div>
 </div>
