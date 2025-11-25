@@ -277,17 +277,38 @@ a:hover {
     font-weight: 500;
 }
 
-.create-post-link {
+/* .create-post-link {
     font-family: var(--font-sans);
     font-size: 0.95rem;
     color: var(--beige-700);
     text-decoration: none;
     padding: 0.5rem 0.75rem;
     transition: color var(--transition-fast);
+} */
+
+.create-post-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--beige-200);
+    color: var(--beige-900);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 1rem; /* Spacing from title */
 }
 
-.create-post-link:hover {
+/* .create-post-link:hover {
     color: var(--beige-900);
+} */
+
+.create-post-link:hover {
+    background-color: var(--accent);
+    color: white;
+    transform: translateY(-2px);
 }
 
 .create-post-link.active {
