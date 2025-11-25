@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Edit Update - Developer Learning Journey</title>
+    <th:block layout:fragment="extra-css">
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <style>
+            .ql-container { height: 300px; font-family: var(--font-sans); font-size: 1rem; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; background-color: white; }
+            .ql-toolbar { border-top-left-radius: 6px; border-top-right-radius: 6px; background-color: #f8f9fa; }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h1>Edit Project Update</h1>
+    </div>
+
+    <div class="card" style="max-width: 900px; margin: 0 auto;">
+        <form id="editUpdateForm">
+            <input type="hidden" id="updateId" th:value="${updateId}">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Project Name *</label>
+                    <input type="text" id="projectName" required class="form-control">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Project Status *</label>
+                    <select id="projectStatus" class="form-control">
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="PLANNING">Planning</option>
+                        <option value="TESTING">Testing</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="ON_HOLD">On Hold</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Update Title *</label>
+                <input type="text" id="title" required class="form-control">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Technologies Used</label>
+                <input type="text" id="technologiesUsed" class="form-control">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Update Type</label>
+                <select id="updateType" class="form-control">
+                    <option value="FEATURE">New Feature</option>
+                    <option value="BUG_FIX">Bug Fix</option>
+                    <option value="REFACTOR">Refactoring</option>
+                    <option value="DOCUMENTATION">Documentation</option>
+                    <option value="DEPLOYMENT">Deployment</option>
+                    <option value="LEARNING">Learning</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Content *</label>
+                <div id="editor"></div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">GitHub Repository (Optional)</label>
+                <input type="url" id="githubRepoUrl" class="form-control">
+            </div>
+
+            <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="javascript:history.back()" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/login';
+
+        const updateId = document.getElementById('updateId').value;
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: { toolbar: [ [{ 'header': [2, 3, false] }], ['bold', 'italic', 'underline', 'strike'], ['blockquote', 'code-block'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image'], ['clean'] ] }
+        });
+
+        // Load existing data
+        async function loadUpdate() {
+            try {
+                const response = await fetch(`/api/projects/${updateId}`); // Updated URL
+                if(response.ok) {
+                    const update = await response.json();
+                    document.getElementById('projectName').value = update.projectName;
+                    document.getElementById('projectStatus').value = update.projectStatus;
+                    document.getElementById('title').value = update.title;
+                    document.getElementById('technologiesUsed').value = update.technologiesUsed;
+                    document.getElementById('updateType').value = update.updateType;
+                    document.getElementById('githubRepoUrl').value = update.githubRepoUrl;
+                    quill.root.innerHTML = update.description;
+                } else {
+                    alert('Failed to load update details');
+                }
+            } catch(e) { console.error(e); }
+        }
+        loadUpdate();
+
+        document.getElementById('editUpdateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorDiv = document.getElementById('errorMessage');
+            const content = quill.root.innerHTML;
+
+            const data = {
+                projectName: document.getElementById('projectName').value,
+                projectStatus: document.getElementById('projectStatus').value,
+                title: document.getElementById('title').value,
+                description: content,
+                technologiesUsed: document.getElementById('technologiesUsed').value,
+                updateType: document.getElementById('updateType').value,
+                githubRepoUrl: document.getElementById('githubRepoUrl').value
+            };
+
+            try {
+                const response = await fetch(`/api/projects/${updateId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Update saved successfully!');
+                    window.location.href = `/projects/update/${updateId}`;
+                } else {
+                    errorDiv.textContent = 'Update failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

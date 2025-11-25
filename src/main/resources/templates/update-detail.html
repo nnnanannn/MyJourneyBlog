@@ -27,6 +27,13 @@
             <span>👤 <span th:text="${update.authorUsername}">Author</span></span>
         </div>
     </div>
+    <div>
+        <a th:href="@{/projects/update/edit/{id}(id=${update.id})}"
+           id="edit-update-btn"
+           style="display: none; color: var(--accent); font-weight: bold; cursor: pointer;">
+            ✏️ Edit Content
+        </a>
+    </div>
 
     <div class="card">
         <div th:if="${update.technologiesUsed != null}" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--beige-200); padding-bottom: 1rem;">
@@ -61,6 +68,7 @@
         <a th:href="@{/projects/project/{name}(name=${update.projectName})}" class="btn btn-secondary">
             Project History
         </a>
+
     </div>
 </div>
 
@@ -80,6 +88,18 @@
         }
         .update-content img { max-width: 100%; border-radius: 4px; }
     </style>
+</th:block>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        // Show edit button if logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if(localStorage.getItem('token')) {
+                const btn = document.getElementById('edit-update-btn');
+                if(btn) btn.style.display = 'inline-block';
+            }
+        });
+    </script>
 </th:block>
 </body>
 </html>
