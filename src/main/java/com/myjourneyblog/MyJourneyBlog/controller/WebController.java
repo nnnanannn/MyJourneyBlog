@@ -89,9 +89,21 @@ public class WebController {
         return "create-post";
     }
 
+    @GetMapping("/learning/post/edit/{id}")
+    public String editPost(@PathVariable Long id, Model model) {
+        model.addAttribute("postId", id);
+        return "edit-post";
+    }
+
     @GetMapping("/create-project")
     public String createProject() {
         return "create-project";
+    }
+
+    @GetMapping("/projects/update/edit/{id}")
+    public String editUpdate(@PathVariable Long id, Model model) {
+        model.addAttribute("updateId", id);
+        return "edit-update";
     }
 
     @GetMapping("/learning/post/{id}")
