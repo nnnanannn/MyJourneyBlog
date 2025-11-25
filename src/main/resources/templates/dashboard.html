@@ -80,8 +80,8 @@
                 <p style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="totalPosts">-</p>
             </div>
             <div class="card">
-                <h4 style="color: var(--beige-600); margin-bottom: 0.5rem;">Total Project Updates</h4>
-                <p style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="totalUpdates">-</p>
+                <h4 style="color: var(--beige-600); margin-bottom: 0.5rem;">Total Project</h4>
+                <p style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="totalProjects">-</p>
             </div>
 <!--            <div class="card">-->
 <!--                <h4 style="color: var(&#45;&#45;beige-600); margin-bottom: 0.5rem;">Total Views</h4>-->
@@ -294,22 +294,37 @@
             }
         });
 
+        // Load stats function
         async function loadStats() {
             try {
-                const [postsRes, updatesRes] = await Promise.all([
-                    fetch('/api/posts'),
-                    fetch('/api/projects')
-                ]);
+<!--                const [postsRes, updatesRes] = await Promise.all([-->
+<!--                    fetch('/api/posts'),-->
+<!--                    fetch('/api/projects')-->]
 
-                const posts = await postsRes.json();
-                const updates = await updatesRes.json();
+                    const response = await fetch('/api/dashboard/stats', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
 
-                document.getElementById('totalPosts').textContent = posts.length;
-                document.getElementById('totalUpdates').textContent = updates.length;
+<!--                const posts = await postsRes.json();-->
+<!--                const updates = await updatesRes.json();-->
 
-                const totalViews = posts.reduce((sum, p) => sum + (p.viewCount || 0), 0) +
-                                  updates.reduce((sum, u) => sum + (u.viewCount || 0), 0);
-                document.getElementById('totalViews').textContent = totalViews;
+<!--                document.getElementById('totalPosts').textContent = posts.length;-->
+<!--                document.getElementById('totalUpdates').textContent = updates.length;-->
+
+<!--                const totalViews = posts.reduce((sum, p) => sum + (p.viewCount || 0), 0) +-->
+<!--                                  updates.reduce((sum, u) => sum + (u.viewCount || 0), 0);-->
+<!--                document.getElementById('totalViews').textContent = totalViews;-->
+                if (response.ok) {
+                    const stats = await response.json();
+
+                    // Update Total Posts
+                    document.getElementById('totalPosts').textContent = stats.totalPosts;
+
+                    // Update Total Projects (mapped from activeProjects in controller)
+                    document.getElementById('totalProjects').textContent = stats.activeProjects;
+                } else {
+                    console.error('Failed to load stats');
+                }
             } catch (error) {
                 console.error('Error loading stats:', error);
             }
