@@ -18,6 +18,13 @@
             <span th:text="'By ' + ${post.authorUsername}">Author</span>
         </div>
     </div>
+    <div>
+        <a th:href="@{/learning/post/edit/{id}(id=${post.id})}"
+           id="edit-post-btn"
+           style="display: none; color: var(--accent); font-weight: bold; cursor: pointer;">
+            ✏️ Edit Post
+        </a>
+    </div>
 
     <div class="card">
 <!--        <div th:if="${post.summary != null}" style="padding: 1rem; background-color: var(&#45;&#45;beige-100); border-left: 4px solid var(&#45;&#45;accent); margin-bottom: 2rem; border-radius: 6px;">-->
@@ -29,7 +36,6 @@
             Post content here...
         </div>
     </div>
-
     <div style="margin-top: 2rem;">
         <a href="/learning/by-date" class="btn btn-secondary">← Back to Learning Journey</a>
     </div>
@@ -48,6 +54,18 @@
         .post-content blockquote { border-left: 4px solid var(--beige-300); padding-left: 1rem; margin: 1rem 0; color: var(--beige-700); font-style: italic; }
         .post-content img { max-width: 100%; height: auto; border-radius: 6px; margin: 1rem 0; }
     </style>
+</th:block>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        // Show edit button if logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if(localStorage.getItem('token')) {
+                const btn = document.getElementById('edit-post-btn');
+                if(btn) btn.style.display = 'inline-block';
+            }
+        });
+    </script>
 </th:block>
 </body>
 </html>
