@@ -177,8 +177,23 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
     }
 
     @Override
+    @Transactional
     public ProjectUpdateDTO updateUpdate(Long id, ProjectUpdateDTO updateDTO) {
-        return null;
+        log.info("Updating project update ID: {}", id);
+
+        ProjectUpdate update = projectUpdateRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectUpdate", id));
+
+        if (updateDTO.getTitle() != null) update.setTitle(updateDTO.getTitle());
+        if (updateDTO.getDescription() != null) update.setDescription(updateDTO.getDescription());
+        if (updateDTO.getProjectName() != null) update.setProjectName(updateDTO.getProjectName());
+        if (updateDTO.getProjectStatus() != null) update.setProjectStatus(updateDTO.getProjectStatus());
+        if (updateDTO.getUpdateType() != null) update.setUpdateType(updateDTO.getUpdateType());
+        if (updateDTO.getTechnologiesUsed() != null) update.setTechnologiesUsed(updateDTO.getTechnologiesUsed());
+        if (updateDTO.getGithubRepoUrl() != null) update.setGithubRepoUrl(updateDTO.getGithubRepoUrl());
+
+        ProjectUpdate saved = projectUpdateRepository.save(update);
+        return toDTO(saved);
     }
 
     private ProjectUpdateDTO toDTO(ProjectUpdate projectUpdate) {
