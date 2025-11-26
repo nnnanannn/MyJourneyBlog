@@ -40,6 +40,15 @@
                         <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
                               th:text="${post.category}">Category</span>
                     </div>
+                    <div class="card-meta">
+                        <a>Last Updated</a>
+                        <span th:text="${#temporals.format(post.updatedAt, 'MMMM dd, yyyy')}">Date</span>
+                    </div>
+
+                    <div class="card-meta">
+                        <a>Created</a>
+                        <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span>
+                    </div>
                     <a th:href="@{/learning/post/{id}(id=${post.id})}"
                        style="color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 1rem; display: inline-block;">
                         Read more →
@@ -75,8 +84,13 @@
 
 
                     <div class="card-meta">
+                        <a>Last Updated</a>
                         <span th:text="${#temporals.format(update.updatedAt, 'MMMM dd, yyyy')}">Date</span>
-                        <span style="margin: 0 0.5rem;">•</span>
+                        <!-- <span style="margin: 0 0.5rem;">•</span> -->
+                    </div>
+                    <div class="card-meta">
+                        <a>Created</a>
+                        <span th:text="${#temporals.format(update.createdAt, 'MMMM dd, yyyy')}">Date</span>
                     </div>
 
                     <a th:href="@{/projects/update/{id}(id=${update.id})}"
