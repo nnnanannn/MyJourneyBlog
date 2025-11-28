@@ -65,7 +65,7 @@ public class EmailService {
      */
     public void sendPasswordResetEmail(String to, String username, String resetToken) {
         String subject = "Reset Your Password";
-        String resetLink = "http://localhost:8080/reset-password?token=" + resetToken;
+        String resetLink = "http://35.77.253.208/reset-password?token=" + resetToken;
         String htmlContent = buildPasswordResetEmail(username, resetLink);
         sendEmail(to, subject, htmlContent);
     }
@@ -75,7 +75,7 @@ public class EmailService {
      */
     public void sendPostPublishedEmail(String to, String username, String postTitle, Long postId) {
         String subject = "Your post has been published!";
-        String postLink = "http://localhost:8080/learning/post/" + postId;
+        String postLink = "http://35.77.253.208/learning/post/" + postId;
         String htmlContent = buildPostPublishedEmail(username, postTitle, postLink);
         sendEmail(to, subject, htmlContent);
     }
@@ -118,7 +118,7 @@ public class EmailService {
                 "            </ul>" +
                 "        </div>" +
                 "        <div style='text-align: center; margin-top: 30px;'>" +
-                "            <a href='http://localhost:8080/dashboard' style='background-color: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;'>Go to Dashboard</a>" +
+                "            <a href='http://35.77.253.208/dashboard' style='background-color: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;'>Go to Dashboard</a>" +
                 "        </div>" +
                 "        <p style='margin-top: 30px; font-size: 14px; color: #666;'>Happy learning!<br>The Developer Journey Team</p>" +
                 "    </div>" +
@@ -210,7 +210,7 @@ public class EmailService {
                 "        <p style='font-size: 18px; margin-bottom: 20px;'>Great news!</p>" +
                 "        <p style='margin-bottom: 15px;'><strong>@" + followerUsername + "</strong> started following your journey.</p>" +
                 "        <div style='text-align: center; margin: 30px 0;'>" +
-                "            <a href='http://localhost:8080/dashboard' style='background-color: #4dabf7; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;'>View Dashboard</a>" +
+                "            <a href='http://35.77.253.208/dashboard' style='background-color: #4dabf7; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;'>View Dashboard</a>" +
                 "        </div>" +
                 "    </div>" +
                 "</body>" +

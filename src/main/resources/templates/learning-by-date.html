@@ -22,7 +22,9 @@
     <div th:if="${postsByDate == null or postsByDate.isEmpty()}" class="card empty-state fade-in" style="text-align: center; padding: 3rem;">
         <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
         <h2>No Posts Yet</h2>
-        <p style="color: var(--beige-600); margin-bottom: 1.5rem;">Start documenting your learning journey today!</p>
+        <a id="start-yours-text" style="color: var(--beige-600); margin-bottom: 1.5rem; display: none;">
+            <span>Start documenting your learning journey today!</span>
+        </a>
         <a href="/create-post" 
         id="create-project-empty-btn" 
         class="btn btn-primary"
@@ -117,6 +119,7 @@
                 // User is logged in, show the buttons
                 const headerBtn = document.getElementById('create-project-btn');
                 const emptyBtn = document.getElementById('create-project-empty-btn');
+                const startYoursText = document.getElementById('start-yours-text');
                 
                 if (headerBtn) headerBtn.style.display = 'inline-block'; // or 'flex' depending on your css
                 if (emptyBtn) emptyBtn.style.display = 'inline-block';

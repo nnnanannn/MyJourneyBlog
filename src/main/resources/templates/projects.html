@@ -18,17 +18,22 @@
         class="create-post-link"
         title="Create Project"
         style="display: none;">
-        <span style="font-size: 1.2rem;">🔨</span> Create/Update  Project
+        <span style="font-size: 1.2rem;">🔨</span> Create/Update Project
         </a>
     </div>
 
     <div th:if="${projects == null or projects.isEmpty()}" class="card empty-state fade-in" style="text-align: center; padding: 3rem;">
         <div style="font-size: 3rem; margin-bottom: 1rem;">👨‍💻</div>
         <h2>No Projects Yet</h2>
-        <p style="color: var(--beige-600); margin-bottom: 1.5rem;">Start your first coding project today!</p>
+        <a id="start-yours-text" style="color: var(--beige-600); margin-bottom: 1.5rem; display: none;">
+            <span>Start your first coding project today!</span>
+        </a>
         <a href="/create-project"
-        id="create-project-empty-btn"
-        class="btn btn-primary">Add Project</a>
+            id="create-project-empty-btn"
+            class="btn btn-primary"
+            style="display: none;">
+            <span>Add Project</span>
+        </a>
     </div>
 
     <div th:if="${projects != null and !projects.isEmpty()}"
@@ -116,6 +121,7 @@
                 // User is logged in, show the buttons
                 const headerBtn = document.getElementById('create-project-btn');
                 const emptyBtn = document.getElementById('create-project-empty-btn');
+                const startYoursText = document.getElementById('start-yours-text');
                 
                 if (headerBtn) headerBtn.style.display = 'inline-block'; // or 'flex' depending on your css
                 if (emptyBtn) emptyBtn.style.display = 'inline-block';
