@@ -1,0 +1,23 @@
+# --- Secrets ---
+.env
+
+# --- Version Control ---
+.git
+.gitignore
+
+# --- Build Output ---
+# Ignore local build artifacts so Docker builds fresh
+target/
+*.class
+*.jar
+*.war
+
+# --- IDEs & Editors (Settings) ---
+.idea
+*.iml
+*.swp
+out/
+
+# --- Logs & Temp ---
+*.log
+logs/
