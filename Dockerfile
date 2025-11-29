@@ -1,6 +1,6 @@
 # --- STAGE 1: Build the Application ---
 # JDK to compile the code
-FROM eclipse-temurin:17-jdk-alpine AS builder
+FROM maven:3.9-eclipse-temurin-17-alpine AS builder
 WORKDIR /app
 
 # Copy target JUST for local computer
@@ -10,11 +10,11 @@ COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
 # 2. Download dependencies (this step is cached if pom.xml doesn't change)
-RUN ./mvnw dependency:go-offline
+RUN mvn dependency:go-offline
 
 # 3. Copy source code and build
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # --- STAGE 2: Run the Application ---
 # JRE (Runtime Environment) which is smaller and safer

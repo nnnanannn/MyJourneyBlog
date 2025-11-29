@@ -38,6 +38,7 @@ jobs:
   deploy:
     needs: build-and-push # Wait for Job 1 to finish
     runs-on: ubuntu-latest
+    if: success() # Only run if build succeeded
     steps:
       - name: Execute Deploy Script on Server
         uses: appleboy/ssh-action@v1.0.3
