@@ -175,8 +175,18 @@
                     alert('Project update created successfully!');
                     window.location.href = '/projects/update/' + update.id;
                 } else {
-                    const error = await response.text();
-                    errorDiv.textContent = error || 'Failed to create update';
+                    try {
+                        const errJson = await response.json();
+                        let displayMsg = errJson.message || 'Failed to create update';
+
+                        if (errJson.validationErrors) {
+                            const details = Object.values(errJson.validationErrors).join('. ');
+                            displayMsg += `: ${details}`;
+                        }
+                        errorDiv.textContent = displayMsg;
+                    } catch (e) {
+                        errorDiv.textContent = 'An unexpected server error occurred.';
+                    }
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {

@@ -197,8 +197,18 @@
                     alert('Post created successfully!');
                     window.location.href = '/learning/post/' + post.id;
                 } else {
-                    const error = await response.text();
-                    errorDiv.textContent = error || 'Failed to create post';
+                    try {
+                        const errJson = await response.json();
+                        let displayMsg = errJson.message || 'Failed to create post';
+
+                        if (errJson.validationErrors) {
+                            const details = Object.values(errJson.validationErrors).join('. ');
+                            displayMsg += `: ${details}`;
+                        }
+                        errorDiv.textContent = displayMsg;
+                    } catch (e) {
+                        errorDiv.textContent = 'An unexpected server error occurred.';
+                    }
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {

@@ -181,9 +181,27 @@
 
                 if (response.ok) {
                     window.location.href = '/projects';
-                } else {
-                    const errText = await response.text();
-                    errorDiv.textContent = 'Failed to create: ' + (errText || 'Unknown error');
+                }
+                else {
+                    try {
+                        // 1. Parse the JSON response
+                        const errJson = await response.json();
+                        
+                        // 2. Get the main message
+                        let displayMsg = errJson.message || 'Failed to save project';
+
+                        // 3. Check for specific validation errors (like "Title too short")
+                        if (errJson.validationErrors) {
+                            // Join all error messages into a clean string
+                            const details = Object.values(errJson.validationErrors).join('. ');
+                            displayMsg += `: ${details}`;
+                        }
+                        
+                        errorDiv.textContent = displayMsg;
+                    } catch (e) {
+                        // Fallback if response isn't JSON
+                        errorDiv.textContent = 'An unexpected server error occurred.';
+                    }
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {
