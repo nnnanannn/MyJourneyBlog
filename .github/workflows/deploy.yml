@@ -42,14 +42,16 @@ jobs:
     steps:
       - name: Execute Deploy Script on Server
         uses: appleboy/ssh-action@v1.0.3
-        env:
+        # Moved JWT_SECRET variable to AWS System Manager
+        # env:
           # This pulls the secret from GitHub and makes it available to the step
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          # JWT_SECRET: ${{ secrets.JWT_SECRET }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Moved JWT_SECRET variable to AWS System Manager
           # This runs the script in deploy.sh file on the server
-            # This tells the action to send the 'JWT_SECRET' variable to the remote server
-          envs: JWT_SECRET
+          # This tells the action to send the 'JWT_SECRET' variable to the remote server
+          #envs: JWT_SECRET
           script: ./deploy.sh
