@@ -48,6 +48,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Load user details
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
+                log.info("User: {}, Authorities: {}", username, userDetails.getAuthorities());
+
                 // Create authentication
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -73,14 +75,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Extract JWT token from Authorization header
+     * Extract JWT token from Authorization header OR Cookie
      */
     private String getJwtFromRequest(HttpServletRequest request) {
+        // 1. Check Authorization Header (Best for APIs)
         String bearerToken = request.getHeader("Authorization");
-
-        // Check if header contains Bearer token
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); // Remove "Bearer " prefix
+            return bearerToken.substring(7);
+        }
+
+        // 2. Check Cookies (Required for Browser Page Navigation)
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
 
         return null;
