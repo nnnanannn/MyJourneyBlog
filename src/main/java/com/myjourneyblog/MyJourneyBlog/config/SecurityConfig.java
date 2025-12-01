@@ -56,10 +56,6 @@ public class SecurityConfig {
                                 "/login",
                                 "/register",
                                 "/error",
-                                "/dashboard",
-                                "/create-post",
-                                "/create-update",
-                                "/create-project",
                                 "/learning/by-date",
                                 "/learning/post/**",
                                 "/projects/by-date",
@@ -71,7 +67,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/projects/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/check/**").permitAll()
 
-                        // All other endpoints require authentication
+                        // All other endpoints require authentication (Includes /dashboard, /create-post, etc.)
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

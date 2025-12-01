@@ -63,8 +63,15 @@
 
                 if (response.ok) {
                     const data = await response.json();
+
+                    // 1. Store for API calls
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('username', data.username);
+
+                    // 2. Store for Page Navigation
+                    // Expires in 1 day (86400 seconds)
+                    document.cookie = `accessToken=${data.token}; max-age=86400; path=/; SameSite=Strict`;
+
                     window.location.href = '/dashboard';
                 } else {
                     const error = await response.text(); // Could be JSON or plain text

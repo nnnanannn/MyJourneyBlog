@@ -3,12 +3,9 @@ package com.myjourneyblog.MyJourneyBlog.service.impl;
 import com.myjourneyblog.MyJourneyBlog.dto.LoginRequest;
 import com.myjourneyblog.MyJourneyBlog.dto.UserRegistrationDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.AuthResponse;
-import com.myjourneyblog.MyJourneyBlog.exception.DuplicateResourceException;
-import com.myjourneyblog.MyJourneyBlog.exception.ValidationException;
+import com.myjourneyblog.MyJourneyBlog.exception.*;
 import com.myjourneyblog.MyJourneyBlog.model.Role;
 import com.myjourneyblog.MyJourneyBlog.model.User;
-import com.myjourneyblog.MyJourneyBlog.exception.GlobalExceptionHandler;
-import com.myjourneyblog.MyJourneyBlog.exception.ResourceNotFoundException;
 import com.myjourneyblog.MyJourneyBlog.repository.UserRepository;
 import com.myjourneyblog.MyJourneyBlog.security.JwtTokenProvider;
 import com.myjourneyblog.MyJourneyBlog.security.UserPrincipal;
@@ -17,6 +14,7 @@ import com.myjourneyblog.MyJourneyBlog.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,9 +42,16 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
+    @Value("${app.features.registration-enabled:true}") // Default to true
+    private boolean registrationEnabled;
+
     @Override
     @Transactional
     public AuthResponse register(UserRegistrationDTO request) {
+        if (!registrationEnabled) {
+            throw new BlogApplicationException("Registration is currently disabled.");
+        }
+
         log.info("Registering new user with username: {}", request.getUsername());
 
         // Validate username availability
