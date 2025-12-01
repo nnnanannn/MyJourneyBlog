@@ -83,8 +83,15 @@
     });
 
     function logout() {
+        // 1. Clear API Tokens
         localStorage.removeItem('token');
         localStorage.removeItem('username');
+
+        // 2. Clear Browser Cookie
+        // Delete it by setting Max-Age to 0
+        document.cookie = "accessToken=; Max-Age=0; path=/; SameSite=Strict";
+
+        // 3. Redirect to Home
         window.location.href = '/';
     }
 </script>
