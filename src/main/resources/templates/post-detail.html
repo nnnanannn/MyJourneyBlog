@@ -1,7 +1,7 @@
 <!-- post-detail.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
       layout:decorate="~{layout}">
 <head>
     <title th:text="${post.title} + ' - Developer Learning Journey'">Post - Developer Learning Journey</title>
@@ -11,7 +11,7 @@
     <div class="page-header">
         <div style="margin-bottom: 1rem;">
                 <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem;"
-                      th:text="${post.title}">Title</span>
+                      th:text="${post.category}">Category</span>
         </div>
         <h1 th:text="${post.title}">Post Title</h1>
         <div style="display: flex; gap: 1.5rem; color: var(--beige-600); font-size: 0.875rem;">
@@ -20,6 +20,7 @@
     </div>
     <div>
         <a th:href="@{/learning/post/edit/{id}(id=${post.id})}"
+           sec:authorize="hasRole('ADMIN')"
            id="edit-post-btn"
            style="display: none; color: var(--accent); font-weight: bold; cursor: pointer;">
             ✏️ Edit Post

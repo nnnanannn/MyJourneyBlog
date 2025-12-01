@@ -61,6 +61,13 @@
             </div>
         </div>
 
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <a href="/projects" class="btn btn-secondary">← All Projects</a>
+<!--            <a th:href="@{/projects/project/{name}(name=${update.projectName})}" class="btn btn-secondary">-->
+<!--                Project Update History-->
+<!--            </a>-->
+        </div>
+
         <div class="pagination" style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;" th:if="${totalPages > 1}">
             <a th:href="@{'/projects/project/' + ${projectName}(page=${currentPage - 1})}"
                th:if="${currentPage > 0}" class="btn btn-secondary">← Newer</a>
