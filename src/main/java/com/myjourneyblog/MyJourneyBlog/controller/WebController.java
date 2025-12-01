@@ -4,6 +4,8 @@ import com.myjourneyblog.MyJourneyBlog.dto.LearningPostDTO;
 import com.myjourneyblog.MyJourneyBlog.dto.ProjectUpdateDTO;
 import com.myjourneyblog.MyJourneyBlog.model.LearningPost;
 import com.myjourneyblog.MyJourneyBlog.model.ProjectUpdate;
+import com.myjourneyblog.MyJourneyBlog.model.SiteSetting;
+import com.myjourneyblog.MyJourneyBlog.repository.SiteSettingRepository;
 import com.myjourneyblog.MyJourneyBlog.service.LearningPostService;
 import com.myjourneyblog.MyJourneyBlog.service.ProjectUpdateService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,8 @@ public class WebController {
     @Autowired
     private ProjectUpdateService projectUpdateService;
 
+    private final SiteSettingRepository siteSettingRepository;
+
     // ==================== PUBLIC PAGES ====================
 
     /**
@@ -60,6 +64,13 @@ public class WebController {
                 .sorted(Comparator.comparing(ProjectUpdateDTO::getCreatedAt).reversed())
                 .limit(5)
                 .collect(Collectors.toList());
+
+        // Fetch About Text dynamically
+        String aboutText = siteSettingRepository.findById("home_about_content")
+                .map(SiteSetting::getValue)
+                .orElse("<p>This is my learning journal where I document my daily progress...</p>"); // Default fallback
+
+        model.addAttribute("aboutText", aboutText);
 
         // Add data to model for Thymeleaf to use
         model.addAttribute("recentPosts", recentPosts);

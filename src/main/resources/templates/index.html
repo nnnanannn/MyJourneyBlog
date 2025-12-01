@@ -1,29 +1,58 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
       layout:decorate="~{layout}">
 <head>
-    <!-- Main styles -->
-<!--    <link rel="stylesheet" th:href="@{/css/style.css}">-->
     <title>Home - My Learning Journey</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 </head>
 <body>
     <div layout:fragment="content">
         <div class = "page-header">
-            <h1>Welcome to My Journey</h1>
+            <h1>MyJourneyBlog</h1>
             <p>Documenting my learning path</p>
         </div>
 
-        <div class = "intro-section" style = "margin-bottom: 3rem;">
-            <div class = "card">
-                <h2 style = "margin-bottom: 1rem;">About This Blog</h2>
-                <p style = "margin-bottom: 1rem;">
-                    This is my learning journal where I document my daily progress.
-                    I track my learning topics, project updates, and technical insights.
-                </p>
-                <p>
-                    Navigate through my learning journey by date or topic, and explore my project updates to see what I'm building!
-                </p>
+        <div th:if="${param.success}" class="alert alert-success fade-in" style="margin-bottom: 2rem;">
+            ✅ Homepage updated successfully!
+        </div>
+
+        <div class="intro-section" style="margin-bottom: 3rem; position: relative;">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <h2 style="margin: 0;">About This Blog</h2>
+
+                    <button sec:authorize="hasRole('ADMIN')"
+                            onclick="openEditModal()"
+                            class="btn btn-secondary"
+                            style="font-size: 0.8rem; padding: 0.25rem 0.75rem;">
+                        ✏️ Edit
+                    </button>
+                </div>
+
+                <div id="displayContent"
+                     style="font-size: 1.1rem; line-height: 1.7; color: var(--beige-800);"
+                     th:utext="${aboutText}">
+                    Loading content...
+                </div>
+            </div>
+        </div>
+
+        <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+            <div class="card" style="width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; background: white; padding: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Edit "About" Section</h3>
+
+                <form id="editForm" method="POST" action="/admin/update-about">
+                    <div style="margin-bottom: 1.5rem; background: white;">
+                        <div id="editor" style="height: 300px;"></div>
+                        <input type="hidden" id="hiddenContent" name="content">
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -104,10 +133,55 @@
             </div>
             <a href="/projects" class="btn" style="margin-top: 1rem;">View All Project Updates</a>
         </section>
-
-
-
-
     </div>
+
+    <th:block layout:fragment="extra-js">
+        <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+        <script>
+            let quill = null;
+
+            function openEditModal() {
+                const modal = document.getElementById('editModal');
+                const displayContent = document.getElementById('displayContent').innerHTML;
+
+                modal.style.display = 'flex';
+
+                // Initialize Quill only once
+                if (!quill) {
+                    quill = new Quill('#editor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                [{ 'header': [1, 2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link', 'clean']
+                            ]
+                        }
+                    });
+                }
+
+                // Load current content into editor
+                quill.root.innerHTML = displayContent;
+            }
+
+            function closeEditModal() {
+                document.getElementById('editModal').style.display = 'none';
+            }
+
+            // Sync content on submit
+            document.getElementById('editForm').addEventListener('submit', function() {
+                document.getElementById('hiddenContent').value = quill.root.innerHTML;
+            });
+
+            // Close modal if clicking outside
+            window.onclick = function(event) {
+                const modal = document.getElementById('editModal');
+                if (event.target == modal) {
+                    closeEditModal();
+                }
+            }
+        </script>
+    </th:block>
 </body>
 </html>
