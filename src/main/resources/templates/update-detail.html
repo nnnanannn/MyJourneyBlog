@@ -34,6 +34,13 @@
            style="display: none; color: var(--accent); font-weight: bold; cursor: pointer;">
             ✏️ Edit Content
         </a>
+
+        <button id="delete-update-btn"
+                class="btn btn-secondary"
+                style="display: none; color: #dc3545; font-weight: bold; cursor: pointer;"
+                onclick="deleteUpdate()">
+            🗑️ Delete Update
+        </button>
     </div>
 
     <div class="card">
@@ -95,13 +102,40 @@
 
 <th:block layout:fragment="extra-js">
     <script>
-        // Show edit button if logged in
+        const token = localStorage.getItem('token');
+        const updateId = [[${update.id}]];
+        const projectName = "[[${update.projectName}]]";
+
         document.addEventListener('DOMContentLoaded', function() {
-            if(localStorage.getItem('token')) {
-                const btn = document.getElementById('edit-update-btn');
-                if(btn) btn.style.display = 'inline-block';
+            if(token) {
+                document.getElementById('edit-update-btn').style.display = 'inline-block';
+                document.getElementById('delete-update-btn').style.display = 'inline-block';
             }
         });
+
+        async function deleteUpdate() {
+            if (!confirm("Delete this project update?")) return;
+
+            try {
+                const response = await fetch(`/api/projects/${updateId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (response.ok) {
+                    alert("Update deleted.");
+                    // Redirect to project history
+                    window.location.href = `/projects/project/${projectName}`;
+                } else {
+                    alert("Failed to delete update.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred.");
+            }
+        }
     </script>
 </th:block>
 </body>

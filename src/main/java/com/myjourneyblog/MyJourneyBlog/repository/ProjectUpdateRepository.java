@@ -24,6 +24,8 @@ public interface ProjectUpdateRepository extends JpaRepository<ProjectUpdate, Lo
 
     List<ProjectUpdate> findByProjectName(String projectName);
 
+    void deleteByProjectName(String projectName);
+
     // ========== ENUM QUERIES ==========
 
     List<ProjectUpdate> findByUpdateType(UpdateType updateType);

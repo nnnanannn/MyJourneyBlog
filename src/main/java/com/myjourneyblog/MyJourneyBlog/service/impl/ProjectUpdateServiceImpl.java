@@ -154,6 +154,13 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
         return toDTO(update);
     }
 
+    @Override
+    @Transactional
+    public void deleteProject(String projectName) {
+        log.info("Deleting all updates for project: {}", projectName);
+        projectUpdateRepository.deleteByProjectName(projectName);
+    }
+
     @Transactional
     @Override
     public void deleteUpdate(Long id) {

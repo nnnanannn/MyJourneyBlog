@@ -144,6 +144,16 @@ public class ProjectUpdateController {
     }
 
     /**
+     * Delete project by name
+     */
+    @DeleteMapping("/project/{projectName}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteProject(@PathVariable String projectName) {
+        projectUpdateService.deleteProject(projectName);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * Delete project update
      */
     @DeleteMapping("/{id}")

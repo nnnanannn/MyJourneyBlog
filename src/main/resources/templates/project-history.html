@@ -56,8 +56,21 @@
                 </span>
             </div>
 
-            <div style="margin-top: 1rem;">
-                <a th:href="@{/projects/update/{id}(id=${update.id})}" style="color: var(--accent); font-weight: 500;">Read full update →</a>
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+
+                <a th:href="@{/projects/update/{id}(id=${update.id})}"
+                   style="color: var(--accent); font-weight: 500;">
+                    Read full update →
+                </a>
+
+                <button class="btn-icon delete-btn"
+                        style="display: none; background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0.5rem; transition: transform 0.2s;"
+                        th:onclick="'deleteUpdate(' + ${update.id} + ')'"
+                        title="Delete Update"
+                        onmouseover="this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.transform='scale(1)'">
+                    🗑️
+                </button>
             </div>
         </div>
 
@@ -86,14 +99,41 @@
 
 <th:block layout:fragment="extra-js">
     <script>
+        const token = localStorage.getItem('token');
+
         document.addEventListener('DOMContentLoaded', function() {
-            const token = localStorage.getItem('token');
             if (token) {
-                // User is logged in, show the create button
-                const btn = document.getElementById('create-project-btn');
-                if(btn) btn.style.display = 'inline-flex';
+                // Show all delete buttons in the list
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.style.display = 'block';
+                });
+
+                // Show the create button
+                const createBtn = document.getElementById('create-project-btn');
+                if(createBtn) createBtn.style.display = 'inline-flex';
             }
         });
+
+        async function deleteUpdate(id) {
+            if (!confirm("Are you sure you want to delete this update?")) return;
+
+            try {
+                const response = await fetch(`/api/projects/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    // Reload page to reflect changes
+                    window.location.reload();
+                } else {
+                    alert("Failed to delete update.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Network error");
+            }
+        }
     </script>
 </th:block>
 </body>
