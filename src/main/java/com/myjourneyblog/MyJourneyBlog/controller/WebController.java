@@ -80,7 +80,7 @@ public class WebController {
         return "index"; // Returns templates/index.html
     }
 
-    @GetMapping("/login")
+    @GetMapping("/admin/login")
     public String login() {
         return "login";
     }
