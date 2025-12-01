@@ -53,7 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/home",
-                                "/login",
+                                "/admin/login",
                                 "/register",
                                 "/error",
                                 "/learning/by-date",
