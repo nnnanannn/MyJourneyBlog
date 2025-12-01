@@ -113,8 +113,19 @@
                         window.location.href = '/login';
                     }, 2000);
                 } else {
-                    const error = await response.text();
-                    errorDiv.textContent = error || 'Registration failed';
+                    try {
+                        const errJson = await response.json();
+                        let displayMsg = errJson.message || 'Registration failed';
+
+                        if (errJson.validationErrors) {
+                            const details = Object.values(errJson.validationErrors).join('. ');
+                            displayMsg += `: ${details}`;
+                        }
+                        errorDiv.textContent = displayMsg;
+                    } catch (e) {
+                        // Handles cases like 500 HTML pages or network timeouts
+                        errorDiv.textContent = 'An unexpected server error occurred.';
+                    }
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {
