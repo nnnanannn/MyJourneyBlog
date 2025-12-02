@@ -453,6 +453,23 @@ a:hover {
     cursor: not-allowed;
 } */
 
+.btn-icon-star {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.8rem; /* Slightly larger for detail page */
+    color: var(--beige-400);
+    transition: transform 0.2s ease, color 0.2s ease;
+    line-height: 1;
+    vertical-align: middle;
+    padding: 0 0.5rem;
+}
+
+.btn-icon-star:hover {
+    transform: scale(1.1);
+    color: var(--accent); /* Preview hover color */
+}
+
 /* ===== CARDS ===== */
 .card {
     background: var(--surface);
@@ -815,10 +832,8 @@ footer {
 .align-center { align-items: center; }
 
 /* ================= MOBILE RESPONSIVENESS ================= */
-
-/* 1. Mobile Toggle Button (Hidden on Desktop) */
 .mobile-menu-toggle {
-    display: none; /* Hide by default */
+    display: none;
     background: none;
     border: none;
     font-size: 1.8rem;
@@ -827,29 +842,20 @@ footer {
     padding: 0.5rem;
 }
 
-/* 2. Media Query for Mobile Devices (max-width 768px) */
 @media (max-width: 768px) {
-
-    /* Allow navbar to grow in height when menu is open */
     .navbar {
         height: auto;
         min-height: 70px;
         padding: 0.5rem 0;
     }
-
-    /* Wrap the container content so links drop to the next line */
     .navbar-container {
         flex-wrap: wrap;
     }
-
-    /* Show the Hamburger Button */
     .mobile-menu-toggle {
         display: block;
     }
-
-    /* Hide the Menu Links by default */
     .nav-menu {
-        display: none; /* HIDDEN! */
+        display: none;
         flex-direction: column;
         width: 100%;
         background-color: var(--beige-50);
@@ -857,32 +863,137 @@ footer {
         margin-top: 1rem;
         padding-bottom: 1rem;
     }
-
-    /* This class is added by JavaScript to SHOW the menu */
     .nav-menu.active {
         display: flex;
     }
-
-    /* Make links span full width */
     .nav-link {
         width: 100%;
         padding: 0.75rem 1rem;
         text-align: left;
     }
-
-    / User/Auth buttons layout */
     .auth-buttons {
         margin-left: 0;
         padding-left: 1rem;
         border-left: none;
-        flex-direction: row; /* Keep avatar and logout side-by-side */
+        flex-direction: row;
         justify-content: flex-start;
         width: 100%;
         margin-top: 0.5rem;
     }
-
-    /* Remove the vertical separator line */
     .auth-buttons::before {
         display: none;
+    }
+}
+
+/* ===== DROPDOWN MENU ===== */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: var(--surface);
+    min-width: 260px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    z-index: 1000;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%); /* Center align */
+    padding: 0.5rem 0;
+}
+
+.dropdown-menu::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -8px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent transparent var(--border) transparent;
+}
+
+.dropdown-item {
+    color: var(--beige-900);
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--beige-100);
+    transition: background-color var(--transition-fast);
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background-color: var(--beige-50);
+}
+
+.dropdown-item-title {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.dropdown-item-date {
+    font-size: 0.75rem;
+    color: var(--beige-600);
+    margin-left: 1rem;
+    white-space: nowrap;
+}
+
+@media (min-width: 769px) {
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .dropdown {
+        width: 100%;
+        display: block;
+    }
+
+    .dropdown-toggle {
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+    }
+
+    .dropdown-menu {
+        position: static;
+        box-shadow: none;
+        border: none;
+        border-left: 2px solid var(--beige-300);
+        margin-left: 1rem;
+        transform: none;
+        width: calc(100% - 1rem);
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .dropdown-menu::before {
+        display: none;
+    }
+
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        border-bottom: none;
+        font-size: 0.9rem;
     }
 }
