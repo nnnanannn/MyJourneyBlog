@@ -67,6 +67,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/projects/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/check/**").permitAll()
 
+                        // Allow Guests to SEE Quick Access
+                        .requestMatchers(HttpMethod.GET, "/api/quick-access/**").permitAll()
+
                         // All other endpoints require authentication (Includes /dashboard, /create-post, etc.)
                         .anyRequest().authenticated()
                 )
