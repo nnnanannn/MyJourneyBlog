@@ -15,11 +15,11 @@
     <div class="navbar-container">
         <a href="/" class="nav-brand">MyJourneyBlog</a>
 
-        <button class="mobile-menu-toggle" aria-label="Toggle navigation">
-            <span>☰</span>
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle navigation">
+            <span id="menu-icon">☰</span>
         </button>
 
-        <div class="nav-menu">
+        <div class="nav-menu" id="nav-menu">
             <a href="/" class="nav-link">Home</a>
             <a href="/learning/by-date" class="nav-link">Learning</a>
             <a href="/projects" class="nav-link">Projects</a>
@@ -34,14 +34,14 @@
                 <!--<a href="/create-post" class="nav-link" title="CreatePost">
                     <span style="font-size: 1.2rem;">✍️</span> CreatePost
                 </a>-->
-                
+
                 <div class="nav-user-profile">
                     <a href="/dashboard" class="nav-user-avatar" title="Dashboard">
                         <span id="nav-avatar-initial">U</span>
                     </a>
                     <span id="nav-username" style="font-weight: 500; display: none;">User</span>
                 </div>
-                
+
                 <button onclick="logout()" class="nav-link" style="background: none; border: none; cursor: pointer;">
                     Sign out
                 </button>
@@ -69,21 +69,33 @@
         const navAvatarInit = document.getElementById('nav-avatar-initial');
 
         if (token && username) {
-            // User is logged in
             if(guestNav) guestNav.style.display = 'none';
             if(userNav) userNav.style.display = 'flex';
-            
-            if(navUsername) {
-                navUsername.textContent = username;
-                // navUsername.style.display = 'inline'; // Uncomment if you want text name next to avatar
-            }
             if(navAvatarInit) navAvatarInit.textContent = username.charAt(0).toUpperCase();
-            
         } else {
-            // Guest mode
             if(guestNav) guestNav.style.display = 'flex';
             if(userNav) userNav.style.display = 'none';
         }
+        
+        // Mobile Menu Toggle Logic
+        const menuToggle = document.getElementById('mobile-menu-toggle');
+        const navMenu = document.getElementById('nav-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        if (menuToggle && navMenu) {
+            menuToggle.addEventListener('click', function() {
+                // Toggle the 'active' class
+                navMenu.classList.toggle('active');
+                
+                // Switch icon between Hamburger (☰) and Close (✕)
+                if (navMenu.classList.contains('active')) {
+                    menuIcon.textContent = '✕';
+                } else {
+                    menuIcon.textContent = '☰';
+                }
+            });
+        }
+
     });
 
     function logout() {
@@ -97,24 +109,6 @@
 
         // 3. Redirect to Home
         window.location.href = '/';
-    }
-
-    // Mobile Menu Toggle Logic
-    const menuToggle = document.querySelector('.mobile-menu-toggle');
-    const navMenu = document.querySelector('.nav-menu');
-
-    if (menuToggle && navMenu) {
-        menuToggle.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
-
-            // Change icon based on state
-            const iconSpan = menuToggle.querySelector('span');
-            if (navMenu.classList.contains('active')) {
-                iconSpan.textContent = '✕'; // Close icon
-            } else {
-                iconSpan.textContent = '☰'; // Hamburger icon
-            }
-        });
     }
 </script>
 

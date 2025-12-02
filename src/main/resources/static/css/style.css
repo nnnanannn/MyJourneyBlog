@@ -785,73 +785,73 @@ footer {
 
 /* ================= MOBILE RESPONSIVENESS ================= */
 
-/* Hide mobile toggle by default (for desktop) */
+/* 1. Mobile Toggle Button (Hidden on Desktop) */
 .mobile-menu-toggle {
-    display: none;
+    display: none; /* Hide by default */
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     cursor: pointer;
     color: var(--beige-900);
+    padding: 0.5rem;
 }
 
-/* Mobile Devices (Tablets and Phones) */
+/* 2. Media Query for Mobile Devices (max-width 768px) */
 @media (max-width: 768px) {
-    /* Show the toggle button */
-    .mobile-menu-toggle {
-        display: block;
+
+    /* Allow navbar to grow in height when menu is open */
+    .navbar {
+        height: auto;
+        min-height: 70px;
+        padding: 0.5rem 0;
     }
 
-    /* Change navbar container to wrap items */
+    /* Wrap the container content so links drop to the next line */
     .navbar-container {
         flex-wrap: wrap;
     }
 
-    /* Hide the menu by default on mobile */
+    /* Show the Hamburger Button */
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    /* Hide the Menu Links by default */
     .nav-menu {
-        display: none;
+        display: none; /* HIDDEN! */
         flex-direction: column;
         width: 100%;
         background-color: var(--beige-50);
         border-top: 1px solid var(--border);
-        padding: 1rem 0;
-        margin-top: 0.5rem;
-        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-bottom: 1rem;
     }
 
-    /* Class to show menu when clicked */
+    /* This class is added by JavaScript to SHOW the menu */
     .nav-menu.active {
         display: flex;
     }
 
-    /* Adjust nav links for mobile list view */
+    /* Make links span full width */
     .nav-link {
-        display: block;
-        padding: 0.75rem 1rem;
         width: 100%;
+        padding: 0.75rem 1rem;
+        text-align: left;
     }
 
-    /* Fix the auth buttons line separator on mobile */
+    / User/Auth buttons layout */
     .auth-buttons {
         margin-left: 0;
-        padding-left: 0;
+        padding-left: 1rem;
         border-left: none;
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row; /* Keep avatar and logout side-by-side */
+        justify-content: flex-start;
         width: 100%;
+        margin-top: 0.5rem;
     }
 
-    /* Remove the vertical line separator pseudo-element */
+    /* Remove the vertical separator line */
     .auth-buttons::before {
         display: none;
     }
-
-    /* Adjust main content padding for smaller screens */
-    .main-content, .container {
-        padding: var(--spacing-md);
-    }
-
-    /* Adjust font sizes for mobile headers */
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.75rem; }
 }
