@@ -15,6 +15,10 @@
     <div class="navbar-container">
         <a href="/" class="nav-brand">MyJourneyBlog</a>
 
+        <button class="mobile-menu-toggle" aria-label="Toggle navigation">
+            <span>☰</span>
+        </button>
+
         <div class="nav-menu">
             <a href="/" class="nav-link">Home</a>
             <a href="/learning/by-date" class="nav-link">Learning</a>
@@ -93,6 +97,24 @@
 
         // 3. Redirect to Home
         window.location.href = '/';
+    }
+
+    // Mobile Menu Toggle Logic
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navMenu = document.querySelector('.nav-menu');
+
+    if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+
+            // Change icon based on state
+            const iconSpan = menuToggle.querySelector('span');
+            if (navMenu.classList.contains('active')) {
+                iconSpan.textContent = '✕'; // Close icon
+            } else {
+                iconSpan.textContent = '☰'; // Hamburger icon
+            }
+        });
     }
 </script>
 
