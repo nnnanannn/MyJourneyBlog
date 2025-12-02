@@ -13,16 +13,29 @@
 <body>
 <nav class="navbar">
     <div class="navbar-container">
+        <!-- 1. Brand Logo -->
         <a href="/" class="nav-brand">MyJourneyBlog</a>
 
+        <!-- 2. The Hamburger Button (Only visible on mobile) -->
         <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle navigation">
             <span id="menu-icon">☰</span>
         </button>
 
+        <!-- 3. The Menu Links -->
         <div class="nav-menu" id="nav-menu">
             <a href="/" class="nav-link">Home</a>
             <a href="/learning/by-date" class="nav-link">Learning</a>
             <a href="/projects" class="nav-link">Projects</a>
+
+            <!-- PINNED POSTS DROPDOWN -->
+            <div class="nav-item dropdown" id="pinned-dropdown-container" style="display: none;">
+                <button class="nav-link dropdown-toggle" onclick="toggleDropdown(event)">
+                    QuickAccess ▾
+                </button>
+                <div class="dropdown-menu" id="pinned-posts-list">
+                    <!-- Items will be loaded here via JS -->
+                </div>
+            </div>
 
             <!-- Commented out for now for not letting users register and sign in-->
             <!--<div id="guest-nav" class="auth-buttons">
@@ -35,6 +48,7 @@
                     <span style="font-size: 1.2rem;">✍️</span> CreatePost
                 </a>-->
 
+                <!-- User Nav (Dashboard/Logout) -->
                 <div class="nav-user-profile">
                     <a href="/dashboard" class="nav-user-avatar" title="Dashboard">
                         <span id="nav-avatar-initial">U</span>
@@ -55,13 +69,17 @@
 </main>
 
 <footer style="text-align: center; padding: 2rem; font-size: 0.875rem; color: var(--beige-600); border-top: 1px solid var(--beige-200); margin-top: auto;">
+
+    <!-- Social Media Icons -->
     <div class="social-links">
+        <!-- GitHub -->
         <a href="https://github.com/nnnanannn" target="_blank" aria-label="GitHub" class="social-icon-link">
             <svg class="social-svg" viewBox="0 0 16 16" version="1.1" aria-hidden="true">
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
             </svg>
         </a>
 
+        <!-- LinkedIn -->
         <a href="https://www.linkedin.com/in/yuttitham-musikatham-533a631b7/" target="_blank" aria-label="LinkedIn" class="social-icon-link">
             <svg class="social-svg" viewBox="0 0 24 24" version="1.1" aria-hidden="true">
                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
@@ -76,32 +94,22 @@
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('token');
         const username = localStorage.getItem('username');
-
-        const guestNav = document.getElementById('guest-nav');
         const userNav = document.getElementById('user-nav');
-        const navUsername = document.getElementById('nav-username');
         const navAvatarInit = document.getElementById('nav-avatar-initial');
 
         if (token && username) {
-            if(guestNav) guestNav.style.display = 'none';
             if(userNav) userNav.style.display = 'flex';
             if(navAvatarInit) navAvatarInit.textContent = username.charAt(0).toUpperCase();
-        } else {
-            if(guestNav) guestNav.style.display = 'flex';
-            if(userNav) userNav.style.display = 'none';
         }
-        
-        // Mobile Menu Toggle Logic
+
+        // Mobile Menu Logic
         const menuToggle = document.getElementById('mobile-menu-toggle');
         const navMenu = document.getElementById('nav-menu');
         const menuIcon = document.getElementById('menu-icon');
 
         if (menuToggle && navMenu) {
             menuToggle.addEventListener('click', function() {
-                // Toggle the 'active' class
                 navMenu.classList.toggle('active');
-                
-                // Switch icon between Hamburger (☰) and Close (✕)
                 if (navMenu.classList.contains('active')) {
                     menuIcon.textContent = '✕';
                 } else {
@@ -110,22 +118,79 @@
             });
         }
 
+        // --- 1. Load Pinned Posts on Load ---
+        loadPinnedPostsInNav();
+
+        // --- 2. Listen for Updates from other pages ---
+        document.addEventListener('quickAccessUpdated', function() {
+            console.log("Layout received update event, refreshing navbar...");
+            loadPinnedPostsInNav();
+        });
     });
 
     function logout() {
-        // 1. Clear API Tokens
         localStorage.removeItem('token');
         localStorage.removeItem('username');
-
-        // 2. Clear Browser Cookie
-        // Delete it by setting Max-Age to 0
-        document.cookie = "accessToken=; Max-Age=0; path=/; SameSite=Strict";
-
-        // 3. Redirect to Home
+        document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.href = '/';
     }
-</script>
 
+    // Toggle Dropdown (Mobile support)
+    function toggleDropdown(event) {
+        if(event) event.preventDefault();
+        const dropdown = event.target.closest('.dropdown');
+        const content = dropdown.querySelector('.dropdown-menu');
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+        } else {
+            content.style.display = 'block';
+        }
+    }
+
+    // Close dropdowns when clicking outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropdown-toggle')) {
+            const dropdowns = document.getElementsByClassName("dropdown-menu");
+            for (let i = 0; i < dropdowns.length; i++) {
+                const openDropdown = dropdowns[i];
+                if (openDropdown.style.display === 'block') {
+                    openDropdown.style.display = 'none';
+                }
+            }
+        }
+    }
+
+    async function loadPinnedPostsInNav() {
+        try {
+            const response = await fetch('/api/quick-access');
+            if (response.ok) {
+                const posts = await response.json();
+                const container = document.getElementById('pinned-posts-list');
+                const dropdownContainer = document.getElementById('pinned-dropdown-container');
+
+                if (container && dropdownContainer) {
+                    if (posts.length > 0) {
+                        dropdownContainer.style.display = 'block';
+
+                        let html = '';
+                        posts.forEach(post => {
+                            const title = post.title.length > 25 ? post.title.substring(0, 25) + '...' : post.title;
+                            html += `<a href="/learning/post/${post.id}" class="dropdown-item">
+                                        <span class="dropdown-item-title">${title}</span>
+                                        <span class="dropdown-item-date">${new Date(post.learningDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                     </a>`;
+                        });
+                        container.innerHTML = html;
+                    } else {
+                        dropdownContainer.style.display = 'none';
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error loading pinned posts for nav", error);
+        }
+    }
+</script>
 <th:block layout:fragment="extra-js"></th:block>
 </body>
 </html>

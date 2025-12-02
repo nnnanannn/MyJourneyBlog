@@ -3,38 +3,46 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
 <head>
-    <title>Learning by Date - Developer Learning Journey</title>
+    <title>Learning by Date - Learning Journey</title>
 </head>
 <body>
 <div layout:fragment="content">
     <div class="page-header fade-in">
         <h1>📅 My Learning Journey</h1>
         <p>Learning progress chronologically</p>
-        <a href="/create-post" 
+        <a href="/create-post"
         id="create-project-btn"
-        class="create-post-link" 
+        class="create-post-link"
         title="CreatePost"
         style="display: none;">
             <span style="font-size: 1.2rem;">✍️</span> Create Learning Post
         </a>
     </div>
 
+<!--    &lt;!&ndash; Quick Access Section (Pinned Posts) &ndash;&gt;-->
+<!--    <div id="quick-access-section" class="card fade-in" style="margin-bottom: 3rem; display: none; border-left: 4px solid var(&#45;&#45;accent); background-color: var(&#45;&#45;beige-50);">-->
+<!--        <h3 style="margin-bottom: 1rem; color: var(&#45;&#45;accent);">⚡ Pinned Posts</h3>-->
+<!--        <div id="quick-access-list" style="display: grid; gap: 0.75rem;">-->
+<!--            &lt;!&ndash; Items loaded via JS &ndash;&gt;-->
+<!--        </div>-->
+<!--    </div>-->
+
     <div th:if="${postsByDate == null or postsByDate.isEmpty()}" class="card empty-state fade-in" style="text-align: center; padding: 3rem;">
         <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
         <h2>No Posts Yet</h2>
         <a id="start-yours-text" style="color: var(--beige-600); margin-bottom: 1.5rem; display: none;">
-            <span>Start documenting your learning journey today!</span>
+            <span>Start documenting learning journey today!</span>
         </a>
-        <a href="/create-post" 
-        id="create-project-empty-btn" 
+        <a href="/create-post"
+        id="create-project-empty-btn"
         class="btn btn-primary"
         style="display: none;">Create Your First Post</a>
     </div>
 
     <div th:if="${postsByDate != null and !postsByDate.isEmpty()}">
-        
+
         <div th:each="entry : ${postsByDate}" style="margin-bottom: 3rem;">
-            
+
             <h2 class="fade-in" style="font-size: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--beige-300); display: flex; align-items: baseline;">
                 <span th:text="${#temporals.format(entry.key, 'EEEE, MMMM dd, yyyy')}">Date</span>
                 <span style="font-size: 1rem; font-weight: normal; color: var(--beige-600); margin-left: 1rem;"
@@ -48,8 +56,19 @@
                        style="text-decoration: none; color: var(--beige-900);">
                         <h3 class="card-title" th:text="'📅 ' + ${post.title}" style="margin: 0;">Post Title</h3>
                     </a>
-                    <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
-                          th:text="${post.category}">Category</span>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <!-- Quick Access Button (Hidden by default, shown via JS if logged in) -->
+                        <button class="btn-icon quick-access-btn"
+                                th:data-post-id="${post.id}"
+                                onclick="toggleQuickAccess(this)"
+                                title="Pin to Quick Access"
+                                style="display: none; background: none; border: none; cursor: pointer; font-size: 1.4rem; color: var(--beige-400); transition: all 0.2s;">
+                            ☆
+                        </button>
+
+                        <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem; white-space: nowrap;"
+                              th:text="${post.category}">Category</span>
+                    </div>
                 </div>
 
                 <div class="card-meta" style="font-size: 0.875rem; color: var(--beige-600); margin-bottom: 1rem;">
@@ -58,7 +77,7 @@
                 </div>
 
                 <div class="card-content">
-                    <div th:text="${post.content != null ? #strings.abbreviate(post.content.replaceAll('<[^>]+>', ' '), 200) : ''}" 
+                    <div th:text="${post.content != null ? #strings.abbreviate(post.content.replaceAll('<[^>]+>', ' '), 200) : ''}"
                          style="color: var(--beige-700);">
                         Summary...
                     </div>
@@ -71,18 +90,18 @@
             </div>
         </div>
 
-        <div class="pagination fade-in" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--beige-300);" 
+        <div class="pagination fade-in" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--beige-300);"
              th:if="${totalPages > 1}">
 
-             <a th:href="@{/learning/by-date(page=0)}" 
+             <a th:href="@{/learning/by-date(page=0)}"
                th:if="${currentPage > 0}"
                class="btn btn-secondary"
                title="First Page">
                &laquo; First
             </a>
             <span th:unless="${currentPage > 0}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">&laquo; First</span>
-            
-            <a th:href="@{/learning/by-date(page=${currentPage - 1})}" 
+
+            <a th:href="@{/learning/by-date(page=${currentPage - 1})}"
                th:if="${currentPage > 0}"
                class="btn btn-secondary">
                ← Previous
@@ -93,14 +112,14 @@
                 Page <span th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">10</span>
             </span>
 
-            <a th:href="@{/learning/by-date(page=${currentPage + 1})}" 
+            <a th:href="@{/learning/by-date(page=${currentPage + 1})}"
                th:if="${currentPage < totalPages - 1}"
                class="btn btn-secondary">
                Next →
             </a>
             <span th:unless="${currentPage < totalPages - 1}" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">Next →</span>
 
-            <a th:href="@{/learning/by-date(page=${totalPages - 1})}" 
+            <a th:href="@{/learning/by-date(page=${totalPages - 1})}"
                th:if="${currentPage < totalPages - 1}"
                class="btn btn-secondary"
                title="Last Page">
@@ -113,18 +132,130 @@
 
 <th:block layout:fragment="extra-js">
     <script>
+        const token = localStorage.getItem('token');
+
         document.addEventListener('DOMContentLoaded', function() {
-            const token = localStorage.getItem('token');
+            // Load state on page load
+            loadQuickAccess();
+
             if (token) {
-                // User is logged in, show the buttons
+                // Admin is logged in: Show the star buttons and create button
                 const headerBtn = document.getElementById('create-project-btn');
+                if (headerBtn) headerBtn.style.display = 'inline-block';
+
                 const emptyBtn = document.getElementById('create-project-empty-btn');
-                const startYoursText = document.getElementById('start-yours-text');
-                
-                if (headerBtn) headerBtn.style.display = 'inline-block'; // or 'flex' depending on your css
                 if (emptyBtn) emptyBtn.style.display = 'inline-block';
+
+                document.querySelectorAll('.quick-access-btn').forEach(btn => {
+                    btn.style.display = 'inline-block';
+                });
             }
         });
+
+        // Toggle Quick Access (Admin Only)
+        async function toggleQuickAccess(btn) {
+            if (!token) return;
+
+            const postId = btn.getAttribute('data-post-id');
+
+            try {
+                const response = await fetch(`/api/quick-access/toggle/${postId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // 1. Update Button Visuals immediately
+                    if (data.isSaved) {
+                        setButtonActive(btn);
+                    } else {
+                        setButtonInactive(btn);
+                    }
+
+                    // 2. Refresh local data logic (in case we re-enable the list later)
+                    loadQuickAccess();
+
+                    // 3. FIX: Tell Layout.html to refresh the Navbar Dropdown
+                    document.dispatchEvent(new Event('quickAccessUpdated'));
+                }
+            } catch (error) {
+                console.error("Error toggling quick access", error);
+            }
+        }
+
+        function setButtonActive(btn) {
+            btn.innerHTML = '★'; // Filled star
+            btn.style.color = 'var(--accent)';
+            btn.title = "Unpin post";
+        }
+
+        function setButtonInactive(btn) {
+            btn.innerHTML = '☆'; // Empty star
+            btn.style.color = 'var(--beige-400)';
+            btn.title = "Pin post";
+        }
+
+        // Load Quick Access List & Update Stars
+        async function loadQuickAccess() {
+            try {
+                const response = await fetch('/api/quick-access');
+
+                if (response.ok) {
+                    const posts = await response.json();
+
+                    // FIX: Check if these elements exist before trying to use them
+                    // (Since you commented them out in HTML, these are null)
+                    const container = document.getElementById('quick-access-list');
+                    const section = document.getElementById('quick-access-section');
+
+                    if (container && section) {
+                        if (posts.length > 0) {
+                            section.style.display = 'block';
+                            container.innerHTML = posts.map(post => `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: white; border: 1px solid var(--beige-200); border-radius: 6px; transition: transform 0.2s;">
+                                    <div>
+                                        <a href="/learning/post/${post.id}" style="text-decoration: none; color: var(--beige-900); font-weight: 600; display: block; margin-bottom: 0.25rem;">
+                                            ${post.title}
+                                        </a>
+                                        <div style="font-size: 0.8rem; color: var(--beige-600);">
+                                            <span>${post.category}</span> • <span>${post.learningDate}</span>
+                                        </div>
+                                    </div>
+                                    <a href="/learning/post/${post.id}" style="color: var(--accent); font-size: 1.2rem; text-decoration: none;">&rarr;</a>
+                                </div>
+                            `).join('');
+                        } else {
+                            section.style.display = 'none';
+                        }
+                    }
+
+                    // Always update the star buttons on the main list if logged in
+                    if (token) {
+                        updateButtonStates(posts);
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading quick access", error);
+            }
+        }
+
+        function updateButtonStates(savedPosts) {
+            // Create an array of saved IDs
+            const savedIds = savedPosts.map(p => p.id);
+
+            document.querySelectorAll('.quick-access-btn').forEach(btn => {
+                // Ensure we parse the ID as an integer for comparison
+                const id = parseInt(btn.getAttribute('data-post-id'));
+
+                if (savedIds.includes(id)) {
+                    setButtonActive(btn);
+                } else {
+                    setButtonInactive(btn);
+                }
+            });
+        }
     </script>
 </th:block>
 

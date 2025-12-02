@@ -4,7 +4,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
       layout:decorate="~{layout}">
 <head>
-    <title th:text="${post.title} + ' - Developer Learning Journey'">Post - Developer Learning Journey</title>
+    <title th:text="${post.title} + ' - Learning Journey'">Post - Learning Journey</title>
 </head>
 <body>
 <div layout:fragment="content">
@@ -13,7 +13,10 @@
                 <span style="background-color: var(--beige-200); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem;"
                       th:text="${post.category}">Category</span>
         </div>
-        <h1 th:text="${post.title}">Post Title</h1>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <h1 th:text="${post.title}" style="margin-bottom: 0;">Post Title</h1>
+<!--               <h1 th:text="${post.title}">Post Title</h1>-->
+        </div>
         <div style="display: flex; gap: 1.5rem; color: var(--beige-600); font-size: 0.875rem;">
             <span th:text="'By ' + ${post.authorUsername}">Author</span>
         </div>
@@ -31,6 +34,14 @@
                 style="display: none; color: #dc3545; font-weight: bold; cursor: pointer;"
                 onclick="deletePost()">
             🗑️ Delete Post
+        </button>
+
+        <button id="detail-star-btn"
+                class="btn-icon-star"
+                th:data-post-id="${post.id}"
+                onclick="toggleDetailStar(this)"
+                title="Pin to Quick Access"
+                style="display: none;"> ☆
         </button>
     </div>
 
@@ -68,6 +79,82 @@
     <script>
         const token = localStorage.getItem('token');
         const postId = [[${post.id}]]; // Thymeleaf variable
+        const starBtn = document.getElementById('detail-star-btn');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (token && starBtn) {
+                // 1. Show the button if admin is logged in
+                starBtn.style.display = 'inline-block';
+
+                // 2. Check if this specific post is ALREADY pinned
+                checkIfPinned();
+            }
+        });
+
+        async function checkIfPinned() {
+            try {
+                // Get list of all pinned posts
+                const response = await fetch('/api/quick-access');
+                if (response.ok) {
+                    const pinnedPosts = await response.json();
+
+                    // Get the ID of the current post from the button's data attribute
+                    const currentPostId = parseInt(starBtn.getAttribute('data-post-id'));
+
+                    // Check if current ID exists in the pinned list
+                    const isPinned = pinnedPosts.some(p => p.id === currentPostId);
+
+                    if (isPinned) {
+                        setStarActive(starBtn);
+                    } else {
+                        setStarInactive(starBtn);
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking pinned status", error);
+            }
+        }
+
+        async function toggleDetailStar(btn) {
+            if (!token) return;
+
+            const postId = btn.getAttribute('data-post-id');
+
+            try {
+                const response = await fetch(`/api/quick-access/toggle/${postId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // 1. Update the Star Visual
+                    if (data.isSaved) {
+                        setStarActive(btn);
+                    } else {
+                        setStarInactive(btn);
+                    }
+
+                    // 2. Trigger Navbar Update (So the dropdown updates instantly)
+                    document.dispatchEvent(new Event('quickAccessUpdated'));
+                }
+            } catch (error) {
+                console.error("Error toggling star", error);
+            }
+        }
+
+        function setStarActive(btn) {
+            btn.innerHTML = '★';
+            btn.style.color = 'var(--accent)';
+            btn.title = "Unpin from Quick Access";
+        }
+
+        function setStarInactive(btn) {
+            btn.innerHTML = '☆';
+            btn.style.color = 'var(--beige-400)';
+            btn.title = "Pin to Quick Access";
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             if(token) {
