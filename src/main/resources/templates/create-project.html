@@ -4,28 +4,7 @@
       layout:decorate="~{layout}">
 <head>
     <title>Create / Update Project - Developer Learning Journey</title>
-    <th:block layout:fragment="extra-css">
-        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-        <style>
-            /* Fix for Quill editor height */
-            .ql-container {
-                height: 300px;
-                font-family: var(--font-sans);
-                font-size: 1rem;
-            }
-            /* Ensure toolbar doesn't look weird */
-            .ql-toolbar {
-                border-top-left-radius: 6px;
-                border-top-right-radius: 6px;
-                background-color: #f8f9fa;
-            }
-            .ql-container {
-                border-bottom-left-radius: 6px;
-                border-bottom-right-radius: 6px;
-                background-color: white;
-            }
-        </style>
-    </th:block>
+    <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
 </head>
 <body>
 <div layout:fragment="content">
@@ -87,8 +66,7 @@
 
             <div style="margin-bottom: 1.5rem;">
                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Content *</label>
-                <div id="editor"></div>
-                <input type="hidden" id="content">
+                <textarea id="editorContent" style="width: 100%; height: 300px; display: none;"></textarea>
             </div>
 
             <div style="margin-bottom: 1.5rem;">
@@ -109,25 +87,29 @@
 </div>
 
 <th:block layout:fragment="extra-js">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/en.js"></script>
     <script>
         const token = localStorage.getItem('token');
         if (!token) window.location.href = '/login';
 
-        // Initialize Quill with specific container
-        var quill = new Quill('#editor', {
-            theme: 'snow',
+        // --- Initialize SunEditor ---
+        const editor = SUNEDITOR.create('editorContent', {
+            width: '100%',
+            height: '300',
+            buttonList: [
+                ['undo', 'redo'],
+                ['font', 'fontSize', 'formatBlock'],
+                ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+                ['fontColor', 'hiliteColor', 'textStyle'],
+                ['removeFormat'],
+                ['outdent', 'indent'],
+                ['align', 'horizontalRule', 'list', 'lineHeight'],
+                ['table', 'link', 'image'],
+                ['fullScreen', 'showBlocks', 'codeView']
+            ],
             placeholder: 'Describe what you worked on, challenges faced, and solutions found...',
-            modules: {
-                toolbar: [
-                    [{ 'header': [2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['link', 'image'],
-                    ['clean']
-                ]
-            }
+            lang: SUNEDITOR_LANG['en']
         });
 
         // Load suggestions logic (Keep existing logic)
@@ -148,12 +130,11 @@
             e.preventDefault();
             const errorDiv = document.getElementById('errorMessage');
 
-            // Get HTML content from Quill
-            const content = quill.root.innerHTML;
-            // Get Text only to check for emptiness
-            const text = quill.getText().trim();
+            // Get content from SunEditor
+            const content = editor.getContents();
+            const textContent = editor.getText(); // Get plain text for validation
 
-            if (text.length === 0 && !content.includes('<img')) {
+            if (textContent.trim().length === 0 && !content.includes('<img')) {
                 errorDiv.textContent = 'Content cannot be empty';
                 errorDiv.style.display = 'block';
                 return;
@@ -163,7 +144,7 @@
                 projectName: document.getElementById('projectName').value,
                 projectStatus: document.getElementById('projectStatus').value,
                 title: document.getElementById('title').value,
-                description: content, // Send HTML content
+                description: content,
                 technologiesUsed: document.getElementById('technologiesUsed').value,
                 updateType: document.getElementById('updateType').value,
                 githubRepoUrl: document.getElementById('githubRepoUrl').value
@@ -184,22 +165,16 @@
                 }
                 else {
                     try {
-                        // 1. Parse the JSON response
                         const errJson = await response.json();
-                        
-                        // 2. Get the main message
                         let displayMsg = errJson.message || 'Failed to save project';
 
-                        // 3. Check for specific validation errors (like "Title too short")
                         if (errJson.validationErrors) {
-                            // Join all error messages into a clean string
                             const details = Object.values(errJson.validationErrors).join('. ');
                             displayMsg += `: ${details}`;
                         }
-                        
+
                         errorDiv.textContent = displayMsg;
                     } catch (e) {
-                        // Fallback if response isn't JSON
                         errorDiv.textContent = 'An unexpected server error occurred.';
                     }
                     errorDiv.style.display = 'block';
