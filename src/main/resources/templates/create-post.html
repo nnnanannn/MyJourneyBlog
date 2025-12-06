@@ -4,7 +4,7 @@
       layout:decorate="~{layout}">
 <head>
     <title>Create Learning Post - My Learning Journey</title>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -48,8 +48,7 @@
 
             <div style="margin-bottom: 1.5rem;">
                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Content *</label>
-                <div id="editor"></div>
-                <input type="hidden" id="content">
+                <textarea id="editorContent" style="width: 100%; height: 500px; display: none;"></textarea>
             </div>
 
             <div style="margin-bottom: 1.5rem;">
@@ -87,46 +86,35 @@
     </div>
 </div>
 
-<th:block layout:fragment="extra-css">
-    <style>
-        #editor {
-            min-height: 300px;
-            max-height: 600px;
-            height: 70vh;  /* Height increased */
-            background-color: white;
-            font-size: 1rem;
-        }
-    </style>
-</th:block>
-
 <th:block layout:fragment="extra-js">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/en.js"></script>
     <script>
         const token = localStorage.getItem('token');
         if (!token) {
             window.location.href = '/login';
         }
 
-        // Set today's date as default
+        // Set today's date
         document.getElementById('learningDate').valueAsDate = new Date();
 
-        // Initialize Quill editor
-        const quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'],
-                    [{ 'align': [] }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'script': 'sub'}, { 'script': 'super' }],
-                    [{ 'indent': '-1'}, { 'indent': '+1' }],
-                    ['link', 'image'],
-                    ['clean']
-                ]
-            },
-            placeholder: 'Write about what you learned today...'
+        // --- Initialize SunEditor ---
+        const editor = SUNEDITOR.create('editorContent', {
+            width: '100%',
+            height: '500',
+            buttonList: [
+                ['undo', 'redo'],
+                ['font', 'fontSize', 'formatBlock'],
+                ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+                ['fontColor', 'hiliteColor', 'textStyle'],
+                ['removeFormat'],
+                ['outdent', 'indent'],
+                ['align', 'horizontalRule', 'list', 'lineHeight'],
+                ['table', 'link', 'image'], // 'table' here gives you the Excel-like grid
+                ['fullScreen', 'showBlocks', 'codeView']
+            ],
+            placeholder: 'Write about what you learned today...',
+            lang: SUNEDITOR_LANG['en']
         });
 
         // Image preview logic
@@ -142,51 +130,46 @@
             }
         });
 
-        // Unified Form Submission
+        // Form Submission
         document.getElementById('createPostForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const content = quill.root.innerHTML;
+            // Get content from SunEditor
+            const content = editor.getContents(); // Get HTML content
+            const textContent = editor.getText(); // Get plain text for validation
             const errorDiv = document.getElementById('errorMessage');
 
-            if (quill.getText().trim().length === 0) {
+            if (textContent.trim().length === 0 && !content.includes('<img')) {
                 errorDiv.textContent = 'Content cannot be empty';
                 errorDiv.style.display = 'block';
                 return;
             }
 
-            // 1. Handle Image Upload (if exists)
+            // Upload Header Image logic (Keep existing)
             let imageUrl = null;
             const imageFile = document.getElementById('postImage').files[0];
 
             if (imageFile) {
                 const formData = new FormData();
                 formData.append('file', imageFile);
-
                 try {
                     const imgResponse = await fetch('/api/files/upload/post-image', {
                         method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + token
-                        },
+                        headers: { 'Authorization': 'Bearer ' + token },
                         body: formData
                     });
-
                     if (imgResponse.ok) {
                         const imgData = await imgResponse.json();
                         imageUrl = imgData.fileUrl;
-                    } else {
-                        console.error('Image upload failed');
                     }
                 } catch (error) {
                     console.error('Image upload error:', error);
                 }
             }
 
-            // 2. Create Post Data
             const postData = {
                 title: document.getElementById('title').value,
-                category: document.getElementById('topic').value, // 'topic' maps to 'category'
+                category: document.getElementById('topic').value,
                 content: content,
                 summary: document.getElementById('summary').value,
                 learningDate: document.getElementById('learningDate').value,
@@ -194,7 +177,6 @@
                 published: document.getElementById('published').checked
             };
 
-            // 3. Send Post Request
             try {
                 const response = await fetch('/api/posts', {
                     method: 'POST',
@@ -210,22 +192,12 @@
                     alert('Post created successfully!');
                     window.location.href = '/learning/post/' + post.id;
                 } else {
-                    try {
-                        const errJson = await response.json();
-                        let displayMsg = errJson.message || 'Failed to create post';
-
-                        if (errJson.validationErrors) {
-                            const details = Object.values(errJson.validationErrors).join('. ');
-                            displayMsg += `: ${details}`;
-                        }
-                        errorDiv.textContent = displayMsg;
-                    } catch (e) {
-                        errorDiv.textContent = 'An unexpected server error occurred.';
-                    }
+                    const errJson = await response.json();
+                    errorDiv.textContent = errJson.message || 'Failed to create post';
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {
-                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.textContent = 'An error occurred.';
                 errorDiv.style.display = 'block';
             }
         });
