@@ -1,7 +1,7 @@
 # MyJourneyBlog Project 🚀
 
-## 🌐 Live Demo
-#### 👉 https://myjourneymemo.blog
+### 🌐 Live Demo
+### 👉 https://myjourneymemo.blog
 
 ## 💡 Overview
 **My personal blog** for documenting my learning journey, 
@@ -67,7 +67,7 @@ The application is deployed on an AWS EC2 Ubuntu instance using a production-rea
 - **Nginx:** Acts as a reverse proxy, listening on ports 80 (HTTP) and 443 (HTTPS) and forwarding traffic to the Docker container.
 - **SSL/TLS:** Automated certificate management via Certbot (Let's Encrypt) ensures HTTPS security.
 
-## ⚙️ Prerequisites for Local Development
+### ⚙️ Prerequisites for Local Development
 - **♨️ Java 17** or higher
 - **📦 Maven 3.6**
 - **🐘 PostgreSQL 12**
